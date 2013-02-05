@@ -1,0 +1,56 @@
+import(Biobase)
+
+
+exportClasses(
+    IcaSet, MineICAParams
+)
+
+exportMethods(
+    dat, "dat<-", datByGene, "datByGene<-", nbComp,  organism, "organism<-", A, Alist, "A<-", S, "S<-", SByGene, "SByGene<-", SByGene, "SByGene<-",
+     "[", "[<-", getComp, indComp, "indComp<-", compNames, "compNames<-", "witGenes<-", witGenes, Slist, SlistByGene, 
+    chipVersion, "chipVersion<-", "chipManu<-", chipManu, "refSamples<-", refSamples, "typeID<-", typeID,
+annotfile, "annotfile<-", Afile, "Afile<-", Sfile, "Sfile<-", datfile, "datfile<-", resPath, "resPath<-", genesPath, "genesPath<-", annot2col, "annot2col<-", selCutoff, "selCutoff<-", pvalCutoff, "pvalCutoff<-", geneNames, mart, "mart<-"
+
+)
+
+export(annot2Color)
+export(annotFeatures)
+export(annotFeaturesComp)
+export(annotFeaturesWithBiomaRt)
+export(annotInGene)
+export(annotReciprocal)
+export(buildIcaSet)
+export(buildMineICAParams)
+export(clusterFastICARuns)
+export(clusterSamplesByComp)
+export(clusterSamplesByComp_multiple)
+export(clusVarAnalysis)
+export(compareAn)
+export(compareAn2graphfile)
+export(compareGenes)
+export(cor2An)
+export(getProj)
+export(getSdExpr)
+export(hypergeoAn)
+export(nbOccInComp)
+export(nodeAttrs)
+export(plotAllMix)
+export(plotCorGraph)
+export(plot_heatmapsOnSel)
+export(plotMix)
+export(plotPosAnnotInComp)
+export(plotPosSamplesInComp)
+export(qualVarAnalysis)
+export(quantVarAnalysis)
+export(relativePath)
+export(runAn)
+export(runCompareIcaSets)
+export(runEnrich)
+export(runICA)
+export(selectContrib)
+export(selectFeatures_IQR)
+export(selectWitnessGenes)
+export(writeGenes)
+export(writeHtmlResTestsByAnnot)
+export(writeProjByComp)
+export(writeRnkFiles)

@@ -1,0 +1,966 @@
+%\VignetteIndexEntry{MineICA: Independent component analysis of genomic data}
+%\VignettePackage{MineICA}
+
+\documentclass[11pt]{article}
+
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{natbib}
+\usepackage[pdftex]{graphicx}
+\usepackage{Sweave}
+\SweaveOpts{keep.source=TRUE,eps=FALSE,pdf=TRUE,prefix=TRUE} 
+\usepackage{fullpage}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{appendix}
+%\usepackage[margin=1.2in]{geometry} %margin=1.2in %a4paper
+%\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{subfig}
+\usepackage{subfloat}
+% R part
+\newcommand{\R}[1]{{\textsf{#1}}}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Metas}[1]{{\texttt{#1}}}
+\newcommand{\AB}[1]{\textbf{\textcolor{blue}{(AB: #1)}}}
+\usepackage{url}
+
+\begin{document}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{formatcom = {\color[rgb]{0, 0, 0.56}}}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{formatcom = {\color[rgb]{0.56, 0, 0}}}
+%\SweaveOpts{prefix.string = images/essai, eps = FALSE, pdf = TRUE}
+
+\title{MineICA: Independent component analysis of transcriptomic data}
+\author{Anne Biton, Andrei Zinovyev, Emmanuel Barillot, Fran\c cois Radvanyi.}
+
+\maketitle
+\begin{abstract}
+  \Rpackage{MineICA} supplies a framework for the storage and the study of a decomposition resulting from the application of independent component analysis (ICA) to transcriptomic data.
+  It defines a new class \Rpackage{IcaSet} extending the class \Rpackage{eSet} of the package \Rpackage{Biobase}, which allows to store the inputs (genomic dataset and sample information) and outputs (mixing and source matrix) of ICA.
+  %\Rpackage{MineICA} helps to interpret the ICA outputs and to compare ICA decompositions obtained on different data through correlation graphs. 
+  \Rpackage{MineICA} helps the biological interpretation of the components by studying their association with variables (e.g sample annotations) and biological processes, and enables the comparison of components from different datasets using correlation-based graph.
+  %the mixing matrix $A$, containing the sample contributions on the components. \Rpackage{MineICA} also helps the interpretation of the source matrix $S$, containing the contributions of the features (e.g genes) to component, by annotating the contributing features and study their association with known biological processes.
+  In practice, by creating interactive summarization of the results and comprehensive plots, \Rpackage{MineICA} makes much easier the
+  interpretation of the numerous data resulting from the application of ICA to transcriptomic data. 
+\end{abstract}
+
+\section{Introduction}
+% \AB{copie Laurent a changer}Measuring gene expressions to study a biological phenomenon or build
+% prognosis tools is now common practice. Technologies like DNA
+% microarrays or RNA-Seq allow to systematically measure the expression
+% of thousands of genes in a sample.
+
+Unlike ICA, clustering methods and PCA are routinely applied to perform unsupervised analysis of genomic high-throughput data.  
+Several studies highlighted the outperformance of ICA over PCA and clustering-based methods in obtaining a more realistic decomposition of the expression data into consistent patterns of coexpressed and coregulated genes \cite{Lee2003Application,Saidi2004Independent,Frigyesi2006Independent,Teschendorff2007Elucidating} associated with the studied phenotypes, like histological grade or estrogen receptor status in breast cancer \cite{Teschendorff2007Elucidating}. Unlike PCA, ICA does not impose an orthogonality constraints between the independent components (ICs). 
+The less frequent use of ICA analysis in bioinformatics studies may be explained by the non-trivial interpretation of its outputs. The aim of \Rpackage{MineICA} is to make the most of the ICA by making available methods to make easier the interpretation of its results.
+
+Several ICA algorithms exist and generally rely on random initializations and compute non-unique solutions. The analysis of the reproducibility of the components across datasets is thus a crucial point in the analysis by for example enabling the selection of components that do not arise from a local minima. \Rpackage{MineICA} implements the study of the component reproducibility among different data sets through correlation-based graphs.
+
+ICA provides a decomposition of the expression matrix $X=AS$, where $A$, the mixing matrix, contains the activity of the components on the samples (e.g tumor samples) and $S$, the source matrix, provides the contribution of each feature (e.g genes) to the components. 
+The source matrix $S$ is thus used to biologically interpret the components by studying their contributing genes, and the matrix $A$ is used to associate the component with sample features by studying the distribution of the samples on the components according to their characteristics (e.g clinical or molecular variables). 
+
+
+\section{Software features}
+
+\Rpackage{MineICA} offers the following functionalities:
+\begin{description}
+\item[Storage of the ICA results] \Rpackage{MineICA} implements the class \Rpackage{IcaSet} whose aim is to contain and describe an ICA decomposition of high-throughput data.
+\item[Storage of analysis parameters] \Rpackage{MineICA} implements the class \Rpackage{MineICAParams} which aims at containing parameters required for the analysis of the ICA results.
+\item[Association with variables] \Rpackage{MineICA} proposes functions to
+  test whether qualitative and quantitative variables (e.g sample annotations) 
+  are differently distributed on the components or differently distributed among 
+  clusters defined on the components. 
+\item[Annotation of the features] The package also provides functions
+  to easily describe feature (e.g gene) annotations using \Rpackage{biomaRt}.
+  The resulting annotation being displayed in HTML files.
+\item[Association with gene sets]  \Rpackage{MineICA} provides functions
+  to run enrichment analysis of the contributing genes using package \Rpackage{GOstats}. 
+\item[Visualization] 
+  \Rpackage{MineICA} provides functions to
+visualize heatmaps of the contributing features, distribution of the variables on the components, 
+or correlation graph between different ICA.
+\end{description}
+
+\section{Case study}
+
+Using microarray-based gene expression data of 200 breast cancer tumors stored in the package \Robject{breastCancerMAINZ} \cite{Schmidt2008}, this vignette shows how \Rpackage{MineICA} can be used to
+study an ICA-based decomposition.  
+
+\subsection{Loading the library and the data}
+
+
+We first load some dependent libraries~:
+<<morelib, echo=TRUE>>=
+library(Biobase)
+library(plyr)
+library(ggplot2)
+library(foreach)
+library(xtable)
+library(biomaRt)
+library(GOstats)
+library(cluster)
+library(marray)
+library(mclust)
+library(RColorBrewer)
+library(igraph)
+library(Rgraphviz)
+library(graph)
+library(colorspace)
+library(annotate)
+library(scales)
+library(gtools)
+@ 
+
+We then load the \Rpackage{MineICA} package by typing or pasting the
+following codes in R command line:
+<<lib, echo=TRUE>>=
+library(MineICA)
+@ 
+
+
+\subsection{Creation of an \Rpackage{IcaSet} object}
+
+Class \Rpackage{IcaSet} extends \Rpackage{eSet} class of package \Rpackage{Biobase}. The \Rpackage{eSet} class won't be described here, please refer to the documentation for details about the attributes of the class \url{http://www.bioconductor.org/packages/2.12/bioc/vignettes/Biobase/inst/doc/Qviews.pdf}.
+Reading the documentation of \verb$expressionSet$ class, another subclass of \Rpackage{eSet}, may also be very useful \url{http://www.bioconductor.org/packages/release/bioc/vignettes/Biobase/inst/doc/ExpressionSetIntroduction.pdf}.\\
+
+Beside including slots of \Rpackage{eSet} class, \Rpackage{IcaSet} class includes additionnal slots in order to contain the ICA outputs $A$ and $S$ (slots \verb$A, S, SByGene$) and information regarding the components (slots \verb$compNames, indComp$, ...). 
+You can get an overview of the structure and available methods by reading the help page:
+<<helpIcaSet, echo=TRUE, print=FALSE, eval=FALSE>>=
+help(IcaSet)
+@ 
+
+\Rpackage{IcaSet} class proposes two levels of storage for the data, the ``feature'' and ``gene'' levels. The slots \verb$S$ (source matrix) and \verb$dat$ (original data) refer to the feature level, while the slots \verb$SByGene$ (source matrix indexed by genes) and \verb$datByGene$ (data indexed by genes) refer to the gene level. 
+It allows to store at the same time the results of ICA applied to the original data indexed by features, these features speaking generally not for themselves (eg, probe set IDs), and the data indexed by annotations of these features into a more comprehensive ID (e.g gene ids). \\
+By default, in \Rpackage{MineICA}, the second level of annotation is called the ``gene'' level but it may in fact correspond to any other annotation (e.g, isoforms, exons, ...). \\
+
+
+In addition to the demands of the \Rpackage{eSet} class for object validity, validity method for \Rpackage{IcaSet} enforces that the sample, feature, and gene names of the slot elements are identical. For example, the row names of the \Robject{phenoData} (the sample annotations) and mixing matrix \Robject{A} must be similar to the column names of \verb$dat$ and \verb$datByGene$. Similarly, row names of \verb$S$ and \verb$SByGene$ must be similar to row names of \verb$dat$ and \verb$datByGene$. The number of components must also be consistent between \verb$A$ and \verb$S$.
+
+\subsubsection{load an example of expression data}
+% Data used in this example are bladder cancer expression data based on
+%   G-U133A Affymetrix microarrays. 
+%   These data were downloaded at \url{http://jco.ascopubs.org/content/24/5/778/suppl/DC1} and restricted to the samples having an ID without character ``\#''.  
+%   We will refer to these data as the 'Mainz' data in the following.
+%   There are 93
+%   tumor samples, and data were normalized with MAS5 by the authors of the
+%   paper using Quantile normalization and
+%   log2-transformation. 
+%   We kept the 10000 most variable probe sets.
+
+  We load the \verb$eSet$ \Robject{mainz} included in the data package \Robject{breastCancerMAINZ}.
+<<loadMainz, echo=TRUE>>=
+## load Mainz expression data and sample annotations.
+library(breastCancerMAINZ)
+data(mainz)
+show(mainz)
+## we restrict the data to the 10,000 probe sets with the highest IQR
+mainz <- selectFeatures_IQR(mainz,10000)
+@ 
+
+\subsubsection{Run ICA}
+
+  We now run the \Rpackage{JADE} algorithm to compute an ICA decomposition of the Mainz data. 
+<<runJade, echo=TRUE, print=FALSE>>=
+library(JADE)
+## Features are mean-centered before ICA computation
+exprs(mainz) <- t(apply(exprs(mainz),1,scale,scale=FALSE))
+colnames(exprs(mainz)) <- sampleNames(mainz)
+## run ICA-JADE
+resJade <- runICA(X=exprs(mainz), nbComp=5, method = "JADE", maxit=10000) 
+@ 
+
+Another ICA algorithm, \Robject{fastICA}, is implemented in \Robject{R} and may be run with function \Robject{runICA}.
+FastICA relies on random initializations and the estimated components may vary between iterations. A way to alleviate this problem is to run \Robject{fastICA} several times, cluster the estimates, and use as the final estimates the centrotypes of the clusters. This strategy is proposed in the matlab package \Rpackage{icasso} \cite{Himberg2004Validating}.
+The function \Robject{clusterFastICARuns} implements this strategy and can be used to estimate the components:
+
+<<fastica, echo=TRUE, eval=FALSE>>=
+library(fastICA)
+## Random initializations are used for each iteration of FastICA
+## Estimates are clustered using hierarchical clustering with average linkage
+res <- clusterFastICARuns(X=exprs(mainz), nbComp=5, alg.type="deflation", nbIt=10, 
+                          funClus="hclust", method="average")
+@ 
+The returned estimates are ranked according to their $Iq$ indices which measure the compactness of the clusters and are defined as the differences between the intra-cluster similarity and the extra-cluster similiarity \cite{Himberg2004Validating}.  
+
+\subsubsection{Create a \Rpackage{MineICAParams} object, function \Robject{buildMineICAParams}}
+
+ Before building an IcaSet instance, we need to create a \Rpackage{MineICAParams} instance that will contain a few parameters used during the analysis of the ICA decomposition. \\
+You need to specify the directory where you would like to put the outputs of the analysis (slot \verb$resPath$), the threshold applied to the projection values used to select the contributing elements (slot \verb$selCutoff$), and the threshold you would like to use for statistical significance (slot \verb$pvalCutoff$):
+ 
+<<buildParams, echo=TRUE>>=
+## build params
+params <- buildMineICAParams(resPath="mainz/", selCutoff=3, pvalCutoff=0.05)
+@ 
+
+If the original data and the ICA outputs $A$ and $S$ were stored in files, the file names would have been included in slots \verb$annotfile, Sfile, Afile$, and \verb$datfile$.
+
+
+\subsubsection{Create an \Rpackage{IcaSet} instance, function \Robject{buildIcaSet}}
+
+Mainz data and the corresponding ICA results have now to be stored in an \Rpackage{IcaSet} object. This task is made easier thanks to the function \Robject{buildIcaSet}.\\
+
+Before building the \Rpackage{IcaSet} object, several information (corresponding to \Rpackage{IcaSet} slots) regarding the feature and gene ids remain to be defined.
+
+\paragraph{annotation:}
+This slot contains the name of an annotation package for the data, if available.\\
+The Mainz data are from HG-U133A microarrays and are indexed by Affymetrix probe set ids. 
+The corresponding annotation package is \Robject{hgu133a.db} and must be loaded:  
+
+<<libannot, echo=TRUE>>=
+## load annotation package
+library(hgu133a.db)
+@ 
+
+\paragraph{attribute \Robject{typeID}:}
+The slot \Robject{typeID} of an \Rpackage{IcaSet} object includes the types of ids to be used for the annotation of the features, and the description of the feature and/or gene ids.\\
+\verb$typeID$ encompasses three elements to be defined:
+      \subparagraph{\Robject{geneID\_annotation}:} defines the object supported by the
+ annotation package (if provided) needed to annotate the features into genes.
+ To see the list of the available objects in the given package:
+<<lspackage, echo=TRUE, print=FALSE>>=
+ls("package:hgu133a.db")
+@ 
+Here we will use \verb$"SYMBOL"$ for Gene Symbols. 
+If no annotation package is provided, this element is not useful and \Rpackage{biomaRt} is used to perform the annotation if required.\\
+ 
+ The two following elements are the IDs used to query \Rpackage{biomaRt}. A database of interest first needs to be specified. Here we use Ensembl for human.
+
+<<mart, echo=TRUE, print=FALSE>>=
+mart <- useMart(biomart="ensembl", dataset="hsapiens_gene_ensembl")
+@
+ \subparagraph{\Robject{geneID\_biomart}:} specifies the type of gene id, and is used for the description of the genes and features if no annotation package is provided. It must be one of the IDs available in the filters of the \verb$mart$ object: 
+
+<<martfilters, echo=TRUE, print=FALSE>>=
+listFilters(mart)[120:125,]
+@
+Here we will use \verb$geneID_biomart='hgnc_symbol'$ for Gene Symbols.
+
+\subparagraph{\Robject{featureID\_biomart}:} specifies the type of feature ID, must be one of the attributes available in \verb$mart$:
+<<martattr, echo=TRUE, print=FALSE>>=
+listAttributes(mart)[grep(x=listAttributes(mart)[,1],pattern="affy")[1:5],]
+@
+HG-U133A probe sets correspond to \verb$affy_hg_u133a$. \\
+
+
+% \Rpackage{MineICA} makes use of \Rpackage{biomaRt} to get a description of the features and/or gene ids that contribute to each component. 
+% The database to be used for annotation has to be chosen using function \Robject{useMart} 
+% <<useMart, echo=FALSE, print=FALSE>>=
+% mart <- useMart(biomart="ensembl", dataset="hsapiens_gene_ensembl")
+% listFilters(mart)
+% @ 
+% We thus need to define which type of feature and  gene ids are available in the Mainz data, but this time in the \Rpackage{biomaRt} way.
+% If you don't know it by advance, 
+
+
+
+The function \Robject{buildIcaSet} encompasses the step of feature annotation.  During the annotation step (either performed using the annotation package or \Rpackage{biomaRt}) if several features are available for a same gene, the median value across those features is attributed to the gene. %
+
+Data can also be provided at the final annotation level (e.g \verb$dat$ and \verb$S$ are already indexed by gene ids), in that case please use \verb$alreadyAnnot=TRUE$ in the function \Robject{buildIcaSet} so that no annotation will be performed.
+
+
+ We can now build the object \Robject{icaSetMainz} with help of function \verb$buildIcaSet$:
+<<buildIcaSet, echo=TRUE, print=FALSE>>=
+## Define typeID, Mainz data originate from affymetrix HG-U133a  microarray 
+## and are indexed by probe sets.
+## The probe sets are annotated into Gene Symbols
+typeIDmainz <-  c(geneID_annotation="SYMBOL", geneID_biomart="hgnc_symbol", 
+                    featureID_biomart="affy_hg_u133a")
+
+## define the reference samples if any, here no normal sample is available
+refSamplesMainz <- character(0)
+
+resBuild <- buildIcaSet(params=params, A=data.frame(resJade$A), S=data.frame(resJade$S),
+                        dat=exprs(mainz), pData=pData(mainz), refSamples=refSamplesMainz,
+                        annotation="hgu133a.db", typeID= typeIDmainz,
+                        chipManu = "affymetrix", mart=mart)
+
+icaSetMainz <- resBuild$icaSet
+params <- resBuild$params
+@
+
+
+
+\subsubsection{\Rpackage{IcaSet} basics}
+An instance of \Rpackage{IcaSet} has been built, we now explore some of the basic operations. \\
+
+When printed, a brief summary of the contents of the object, based on the one available in class \Rpackage{eSet}, is displayed:
+<<showIcaSet>>=
+icaSetMainz
+@ 
+
+
+\paragraph{Accessing} 
+
+A number of accessor functions are available to extract data from an \Rpackage{IcaSet} instance.
+We will describe the most common accessor functions, most of them being inherited from class \Rpackage{eSet}.
+
+You can access the phenotype data using \verb$pData$:
+<<defannot, echo=TRUE, print=FALSE>>=
+annot <- pData(icaSetMainz)
+@ 
+
+The columns of the phenotype data, are called the variables. The variable labels can be retrieved using the function \verb$varLabels$ and one variable can be accessed using \$:
+<<lookvar, echo=TRUE, print=FALSE>>=
+varLabels(icaSetMainz)[1:5]
+icaSetMainz$grade[1:5]
+@ 
+
+The feature names and their annotations (called ``genes'' by default), such as the sample names can respectively be retrieved using the functions \verb$featureNames$, \verb$geneNames$, and \verb$sampleNames$:
+<<lookfeatures, echo=TRUE, print=FALSE>>=
+featureNames(icaSetMainz)[1:5] # probe set ids
+geneNames(icaSetMainz)[1:5] #gene symbols
+sampleNames(icaSetMainz)[1:5] 
+@ 
+
+The data ICA was applied to and its annotation into genes (if available) can be accessed using the functions \verb$dat$ and \verb$datByGene$
+<<lookdat, echo=TRUE, print=FALSE, eval=FALSE>>=
+head(dat(icaSetMainz)) #probe set level
+head(datByGene(icaSetMainz)) #gene level
+@ 
+
+
+An ICA decomposition consists of two matrices, the mixing matrix $A$ containing the sample contributions and the source matrix $S$ containing the feature projections. 
+They can be retrieved from an \Rpackage{IcaSet} object using the methods of the same name: \verb$A$ and \verb$S$. 
+The method \verb$S$ returns matrix $S$ at the feature level (e.g, containing projection of the features), while \Robject{SByGene} returns the projection values at the gene level:
+<<lookAS, echo=TRUE, print=FALSE, eval=FALSE>>=
+A(icaSetMainz)
+S(icaSetMainz)
+SByGene(icaSetMainz)
+@ 
+
+The number of components computed by ICA, but also their labels and indices can be extracted with \verb$nbComp, compNames$, and \verb$indComp$:
+<<lookcomp, echo=TRUE, print=FALSE, eval=FALSE>>=
+nbComp(icaSetMainz)
+compNames(icaSetMainz)
+indComp(icaSetMainz)
+@ 
+
+
+For graphical purpose, an \Rpackage{IcaSet} object includes a slot \Robject{witGenes} containing either one gene id per component (or whatever is refered as the level ``gene''), or one feature id per component if the \Rpackage{IcaSet} object has only one level of annotation. Each ``witness'' is a contributor of the component and is used to denote the direction of the expression according to the direction of the component. 
+These witnesses can be automaticall selected with the function \Robject{selectWitnessGenes} and are automatically defined when an \Rpackage{IcaSet} object is created through \Robject{buildIcaSet}.  By default, for a given component, a witness gene corresponds to an individual having an absolute scaled projection value larger than \Robject{selCutoff} in at most one IC. Its sign of contribution should be the same than the majority of the selected contributing genes.
+
+<<witG, echo=TRUE>>=
+witGenes(icaSetMainz)[1:5]
+## We can for example modify the second contributing gene 
+witGenes(icaSetMainz)[3] <- "KRT16"
+@ 
+
+
+\paragraph{Accessing slots in different data formats}
+Slots \Robject{A, S,} and \Robject{SByGene} are \Robject{data.frame} objects. A common need is to extract these data.frame in the form of a list where row names are preserved. It can be done using the functions \Robject{Alist, Slist}, and \Robject{SlistByGene}. 
+
+\paragraph{Setting} 
+
+The names of the accession functions described above, can also be used for setting the slots of an \Rpackage{IcaSet} object by adding operator \verb$<-$ and the new value. For example:
+<<echo=TRUE, print=FALSE, eval=FALSE>>=
+compNames(icaSetMainz) <- paste("IC",1:nbComp(icaSetMainz),sep="")
+@ 
+
+
+\paragraph{Subsetting} 
+
+Subsetting an IcaSet is very similar to subsetting the expression matrix that is contained within the IcaSet to a subset of features/genes (first argument) and samples (second argument), except for a third argument that allows to subsets the components. 
+
+<<echo=TRUE, eval=FALSE>>=
+## select tumor samples of grade 3
+keepSamples <- sampleNames(icaSetMainz)[icaSetMainz$grade=="3"]
+## Subset icaSetMainz to the grade-3 samples 
+icaSetMainz[,keepSamples]
+## Subset icaSetMainz to the grade-3 samples and the first five components
+icaSetMainz[,keepSamples,1:5]
+## Subset icaSetMainz to the first 10 features
+icaSetMainz[featureNames(icaSetMainz)[1:10],keepSamples]
+@ 
+
+
+
+
+\paragraph{Useful basic functions}
+
+Other functions which allow to extract data from an \Rpackage{IcaSet} object are available.
+
+
+\subparagraph{Select the contributing features or genes:}
+When applying ICA decomposition to genomic data, for example here gene expression data, the distribution of the gene projections on the ICs is expected to be super-Gaussian: a large portion of genes follows a (super-)Gaussian centered at zero and a small portion belongs to an outgrowth located on the right and/or on the left of the distribution. In order to select the elements belonging to this outgrowth, we used the conventional way based on a threshold. The thresholds can typically be 3 or 4 standard deviations from the mean. 
+We refer to the resulting selected genes as the ``contributing genes''.
+
+Here is the histogram of the projection values for the first component.
+\begin{figure}
+\begin{center}
+<<histProj6, echo=FALSE, print=FALSE, fig=TRUE>>=
+hist(S(icaSetMainz)[,1], breaks=50, main="Distribution of feature projection on the first component", 
+     xlab="projection values")
+abline(v=c(3,-3), col="red", lty=2)
+@ 
+\end{center}
+\label{fig:histProj6}
+\end{figure}
+
+The function \Robject{selectContrib} allows to select the contributing elements from a list of projection values. 
+<<selectContribGenes, echo=TRUE>>=
+## Extract the contributing genes
+contrib <- selectContrib(icaSetMainz, cutoff=3, level="genes")
+## Show the first contributing genes of the first and third components
+sort(abs(contrib[[1]]),decreasing=TRUE)[1:10]
+sort(abs(contrib[[3]]),decreasing=TRUE)[1:10]
+@
+
+<<selectContribGenes, eval=FALSE>>=
+## One can also want to apply different cutoffs depending on the components
+## for example using the first 4 components:
+contrib <- selectContrib(icaSetMainz[,,1:4], cutoff=c(4,4,4,3), level="genes")
+@ 
+
+\subparagraph{Extract data of a specific component:}
+The function \Robject{getComp} allows to extract the projection values and sample contribution of a specific component:
+<<extractComp, echo=TRUE>>=
+## extract sample contributions and gene projections of the second component
+comp2 <- getComp(icaSetMainz, level="genes", ind=2)
+## access the sample contributions 
+comp2$contrib[1:5]
+## access the gene projections
+comp2$proj[1:5]
+@ 
+
+
+
+\subsection{Run global analysis}
+
+The function \Robject{runAn} enables to study an \Rpackage{IcaSet} object by calling all the functions dedicated to the analysis of an ICA decomposition in the package \Rpackage{MineICA}. 
+The outputs are written in the path \verb$resPath(params)$, each sub-directory containing the outputs of a specific analysis.
+
+We apply the function \verb$runAn$ to the object \Robject{icaSetMainz}: 
+<<runAn, echo=TRUE, eval=TRUE, print=FALSE>>=
+## select the annotations of interest
+varLabels(icaSetMainz)
+# restrict the phenotype data to the variables of interest
+keepVar <- c("age","er","grade")
+# specify the variables that should be treated as character
+icaSetMainz$er <- c("0"="ER-","1"="ER+")[as.character(icaSetMainz$er)]
+icaSetMainz$grade <- as.character(icaSetMainz$grade)
+@ 
+<<runAn, echo=TRUE, eval=FALSE, print=FALSE>>=
+## Run the analysis of the ICA decomposition
+# only enrichment in KEGG gene sets are tested
+runAn(params=params, icaSet=icaSetMainz, writeGenesByComp = TRUE, 
+      keepVar=keepVar, dbGOstats = "KEGG")
+@ 
+
+The resulting plots and data are located in the main results path, which here is the ``mainz/'' current directory:
+<<runAn, echo=TRUE>>= 
+resPath(params)
+@ 
+
+The sub-directories automatically created by the function \Robject{runAn}  are the following:
+\begin{description}
+  \item[ProjByComp/:] contains the annotations of the 
+    features or genes, one file per component;
+  \item[varAnalysisOnA/:] contains two directories: 'qual/'
+  and 'quant/' which respectively contain the results of
+  the association between components and qualitative and/or
+  quantitative variables; 
+  \item[Heatmaps/:]contains the
+  heatmaps (one pdf file per component) of the contributing
+  genes by component;
+  \item[varOnSampleHist/:] contains
+  the histograms of the sample contributions superimposed with
+  the histograms of the groups of samples defined by the variables of interest (e.g tumor grade).
+  % \item[cluster2var/:]contains the association between a
+  % clustering of the samples performed on the mixing matrix
+  % \Robject{A} and the variables.
+\end{description}
+
+
+\subsection{Run analysis by calling individual functions}
+
+The functions implicitely called by \Robject{runAn} can be run individually. 
+In this section, we will provide examples of each of these functions. 
+
+\subsubsection{Write description of contributing genes or features, function \Robject{writeProjByComp}}
+
+Each component is a direction in the space where axis are the samples and points are genes whose locations are defined by their expression profiles across samples.
+In matrix $S$, each component is thus defined by a vector of gene projection values. 
+When applying ICA to gene expression data, each component is typically triggered by a group of genes co-expressed on a subset of samples. These genes responsible for the existence of the component will typically have high projections, we call them the \textit{contributing} genes. 
+
+The first way to study a component is to look at its contributing genes.  The function \Robject{writeProjByComp} allows to describe genes with a projection value higher than a given threshold on each component. 
+
+As in PCA, the components computed by ICA are defined up to their sign. On a given component, genes with opposite projection signs are elements whose expressions are anti-correlated on the samples distributed at both ends of the component. The function \Robject{writeProjByComp} therefore orders genes by absolute projection values. 
+
+This function creates a HTML file per component containing the description of the
+  contributing features or genes, and a file containing the projection values of each feature or gene across all components.
+  
+  The needed information are queried through \Rpackage{biomaRt}. By default, the descriptors used to annotate the gene ids are their Gene Symbols, Ensembl IDs, biological description and genomic locations. If you would like to add descriptors, please fill argument \Robject{typeRetrieved}. Here we will content ourselves with the defaults ones. You can change the threshold used to select the genes to be described using the argument \verb$selCutoffWrite$.
+  
+  
+Here we are interested in the description of the projection values at the gene level (\Robject{level=''genes''}).   
+<<writeProj, echo=TRUE, eval=TRUE>>=
+resW <- writeProjByComp(icaSet=icaSetMainz, params=params, mart=mart, 
+                        level='genes', selCutoffWrite=2.5)
+## the description of the contributing genes of each component is contained 
+## in res$listAnnotComp which contains the gene id, its projection value, the number and 
+## the indices of the components on which it exceeds the threshold, and its description.
+head(resW$listAnnotComp[[1]])
+## The number of components a gene contributes to is available 
+## in res$nbOccInComp
+head(resW$nbOccInComp)
+## The output HTML files are located in the path:
+genesPath(params)
+@ 
+
+
+\subsubsection{Plot heatmaps of the contributing elements, function \Robject{plot\_heatmapsOnSel}}
+
+A way to visualize the pattern captured by a component is to draw the heatmap of its contributing features/genes. 
+The function \verb$plot_heatmapsOnSel$ enables to plot the heatmaps of the contributing genes for each component.  
+On those heatmap, features and samples are either ranked by their contribution value to the component,  or clustered with hierarchical clustering. 
+
+Here we choose to study the data at the gene level (\verb$level="genes"$), and a threshold of 3 is used for the selection of the contributing genes.
+
+<<plotHeatmaps, echo=TRUE, print=FALSE, eval=FALSE>>=
+## selection of the variables we want to display on the heatmap
+keepVar <- c("er","grade")
+## For the second component, select contributing genes using a threshold of 3 
+## on the absolute projection values,
+## heatmap with dendrogram
+resH <- plot_heatmapsOnSel(icaSet = icaSetMainz, selCutoff = 3, level = "genes", 
+                           keepVar = keepVar,
+                           doSamplesDendro = TRUE, doGenesDendro = TRUE, keepComp = 3,
+                           heatmapCol = maPalette(low = "blue",high = "red", mid = "yellow", k=44),
+                           file = "heatmapWithDendro", annot2col=annot2col(params))
+
+
+## heatmap where genes and samples are ordered by contribution values
+resH <- plot_heatmapsOnSel(icaSet = icaSetMainz, selCutoff = 3, level = "genes", 
+                           keepVar = keepVar,
+                           doSamplesDendro = FALSE, doGenesDendro = FALSE, keepComp = 3,
+                           heatmapCol = maPalette(low = "blue",high = "red", mid = "yellow", k=44),
+                           file = "heatmapWithoutDendro", annot2col=annot2col(params))
+
+@ 
+
+The heatmap where samples are ranked by sample contributions shows a group of tumors distributed at the left/negative end of the IC that strongly under-express and over-express sone of the contributing genes of the component, and whose pattern of expression is strongly anticorrelated with the tumors distributed at the opposite end of the component (Figure~\ref{fig:exheatmap}). According to the second row of the top panel displaying the tumor annotations, these tumors are preferentially ER negative. 
+
+\begin{figure}[htbp]
+  \centering 
+\subfloat[]{\includegraphics{images/2_orderedByContrib_zval3.pdf}} \\
+\subfloat[]{\includegraphics{images/2_withDendro_zval3.pdf}} 
+  \caption[Heatmap of component 2.]{Heatmap of component 2.  The expression matrix is restricted to the contributing genes with an absolute scaled projection exceeding 3, and each gene expression profile is centered. In heatmap (a), genes and samples are ranked by their contribution to the IC. 
+}
+  \label{fig:exheatmap}
+\end{figure}
+
+\subsubsection{Gene enrichment analysis, function \Robject{runEnrich}}
+
+To obtain a biological interpretation of the component, it can be useful to study the association of its contributing genes with gene sets grouping genes involved in a same biological processes or sharing a same factor of regulation.
+In order to identify the gene sets which are enriched in the list of selected (contributing) genes, the function \Robject{runEnrich} uses \verb$R$ \verb$GOstats$ package \cite{Falcon2007Using} which makes use of a hypergeometric distribution to test the over-representation of a gene set in a given list of genes.
+<<runEnrich, echo=TRUE, eval=FALSE>>=
+## run enrichment analysis on the first three components of icaSetMainz, 
+## using gene sets from KEGG and ontology 'Biological Process' (BP) of Gene Ontology (GO)
+resEnrich <- runEnrich(params=params,icaSet=icaSetMainz[,,1:3],
+                       dbs=c("GO"), ontos="BP")
+@ 
+
+The output \Robject{resEnrich} is a list whose each element contains results obtained on each database for every component tested. For each component, three enrichment results are available, depending on how contributing genes are selected: on the absolute projection values (``both''), on the positive projection (``pos''), and on the negative projection (``neg'').
+
+We can see that the first component is associated with the cell cycle, the second with immune reaction, and the third component with epiderm development: 
+
+<<runEnrich2, echo=TRUE, print=FALSE, eval=FALSE>>=
+## Access results obtained for GO/BP for the first three components 
+# First component, when gene selection was based  on the absolute projection values
+head(resEnrich$GO$BP[[1]]$both)
+@ 
+<<runEnrich2bis, echo=FALSE, print=FALSE, eval=TRUE>>=
+structure(list(GOBPID = c("GO:0000236", "GO:0031581", "GO:0045786", 
+"GO:0045104", "GO:0010389", "GO:0031577"), Pvalue = c(1.07618237962117e-05, 
+1.31817485465954e-05, 0.00010249730291343, 0.00199032614648593, 
+0.0022683621486939, 0.0022683621486939), OddsRatio = c(37.2312925170068, 
+93.6306818181818, 9.90278637770898, 36.7090301003344, 34.0807453416149, 
+34.0807453416149), ExpCount = c(0.144770177343467, 0.0497647484618169, 
+0.79623597538907, 0.0678610206297503, 0.0723850886717336, 0.0723850886717336
+), Count = c(4L, 3L, 6L, 2L, 2L, 2L), Size = c(32L, 11L, 176L, 
+15L, 16L, 16L), Term = c("mitotic prometaphase", "hemidesmosome assembly", 
+"negative regulation of cell cycle", "intermediate filament cytoskeleton organization", 
+"regulation of G2/M transition of mitotic cell cycle", "spindle checkpoint"
+), In_geneSymbols = c("BIRC5,CDC20,CDCA8,CENPN", "DST,COL17A1,KRT14", 
+"BIRC5,DST,CDC20,TOP2A,CDC45,MCM10", "DST,KRT14", "TOP2A,CDC45", 
+"BIRC5,CDC20")), .Names = c("GOBPID", "Pvalue", "OddsRatio", 
+"ExpCount", "Count", "Size", "Term", "In_geneSymbols"), row.names = c(NA, 
+6L), class = "data.frame")
+@ 
+
+
+<<runEnrich3, echo=TRUE, print=FALSE, eval=FALSE>>=
+# Second component, when gene selection was based on the negative projection values
+head(resEnrich$GO$BP[[2]]$left)
+@ 
+<<runEnrich3bis, echo=FALSE, print=FALSE, eval=TRUE>>=
+structure(list(GOBPID = c("GO:0002253", "GO:0006959", "GO:0006955", 
+"GO:0002684", "GO:0048584", "GO:0002429"), Pvalue = c(1.52817137763709e-07, 
+4.81288352728676e-07, 1.22396115326329e-06, 6.35955291059939e-06, 
+9.25622695313701e-06, 1.06767418066984e-05), OddsRatio = c(18.3424657534247, 
+27.0398009950249, 28.8538011695906, 11.2582995951417, 7.46730769230769, 
+21.6746411483254), ExpCount = c(0.668838219326819, 0.317046688382193, 
+0.415086965018566, 1.11467391304348, 2.47991313789359, 0.308360477741585
+), Count = c(8L, 6L, 6L, 8L, 11L, 5L), Size = c(154L, 73L, 177L, 
+293L, 571L, 71L), Term = c("activation of immune response", "humoral immune response", 
+"immune response", "positive regulation of immune system process", 
+"positive regulation of response to stimulus", "immune response-activating cell surface receptor signaling pathway"
+), In_geneSymbols = c("IGHG1,IGKC,LCK,PTPRC,PTPN22,TRBC1,IGKV4-1,TRAT1", 
+"IGHG1,IGKC,SH2D1A,POU2AF1,CXCL13,IGKV4-1", "MS4A1,IGHD,IGHM,IGJ,CXCL9,CXCL11", 
+"IGHG1,IGKC,SH2D1A,CCL5,CXCL13,PTPN22,TRBC1,IGKV4-1", "IGHG1,IGKC,LCK,SH2D1A,PTPRC,CCL5,CXCL13,PTPN22,TRBC1,IGKV4-1,TRAT1", 
+"LCK,PTPRC,PTPN22,TRBC1,TRAT1")), .Names = c("GOBPID", "Pvalue", 
+"OddsRatio", "ExpCount", "Count", "Size", "Term", "In_geneSymbols"
+), row.names = c(NA, 6L), class = "data.frame")
+
+@ 
+
+<<runEnrich4, echo=TRUE, print=FALSE, eval=FALSE>>=
+# Third component
+head(resEnrich$GO$BP[[3]]$both, n=5)
+@ 
+<<runEnrich4bis, echo=FALSE, print=FALSE, eval=TRUE>>=
+structure(list(GOBPID = c("GO:0008544", "GO:0034330", "GO:0045104", 
+"GO:0060687", "GO:0060512"), Pvalue = c(8.06278555738841e-06, 
+0.000234608964462521, 0.00034947787505441, 0.000886129575409258, 
+0.000980819533506728), OddsRatio = c(7.96682149966821, 7.90315480557594, 
+27.305, 71.5032679738562, 18.1833333333333), ExpCount = c(1.40028954035469, 
+0.891965255157438, 0.143865363735071, 0.0479551212450235, 0.201411509229099
+), Count = c(9L, 6L, 3L, 2L, 3L), Size = c(146L, 93L, 15L, 5L, 
+21L), Term = c("epidermis development", "cell junction organization", 
+"intermediate filament cytoskeleton organization", "regulation of branching involved in prostate gland morphogenesis", 
+"prostate gland morphogenesis"), In_geneSymbols = c("EGFR,KRT5,KRT14,KRT15,KRT16,KRT17,KLK7,S100A7,CALML5", 
+"CDH3,GPM6B,KRT5,KRT14,SFRP1,UGT8", "KRT14,KRT16,SYNM", "ESR1,SFRP1", 
+"ESR1,SERPINB5,SFRP1")), .Names = c("GOBPID", "Pvalue", "OddsRatio", 
+"ExpCount", "Count", "Size", "Term", "In_geneSymbols"), row.names = c(NA, 
+5L), class = "data.frame")
+@ 
+
+The function \Robject{runEnrich} also writes these enrichment results in HTML files located in the sub-directory "GOstatsEnrichAnalysis" of the result path.
+
+\subsubsection{Association with sample variables}
+
+Recall that a component is a direction in the gene space whose axis are defined by the samples. The mixing matrix $A$ contains the coordinates of the components on the sample axis, we call these values the \textit{sample contributions}.
+
+
+
+The association of qualitative variables (e.g sample characteristics like tumor grade) with the components can be studied by comparing the contributions of the groups of samples they define. Depending on the number of groups formed by a given variable, their distribution can be compared either using a Wilcoxon (two groups) or a Kruskall-Wallis test (at least three groups). 
+The function \Robject{qualVarAnalysis} tests whether the groups of samples formed by the qualitative variables are differently distributed on the components in terms of contribution value and plots the corresponding densities or boxplots using \Rpackage{ggplot2}.
+
+If the levels of some variables in the \Robject{phenoData} of your \Rpackage{IcaSet} object are ordered (e.g, increasing tumor stage T1 T2 T3...), we advise you to declare these variables as factors whose levels are correctly ordered. %Thus, they will appear in the wanted order in the plots.  
+<<stagebis, echo=FALSE, print=FALSE>>=
+icaSetMainz$grade <- factor(as.character(icaSetMainz$grade), levels=c("1","2","3"))
+@ 
+
+<<varAn, echo=TRUE, print=FALSE>>=
+### Qualitative variables
+## Compute Wilcoxon and Kruskall-Wallis tests to compare the distribution 
+## of the samples according to their grade and ER status on all components.
+resQual <- qualVarAnalysis(params=params, icaSet=icaSetMainz, 
+                           keepVar=c("er","grade"),
+                           adjustBy="none", typePlot="boxplot", 
+                           path="qualVarAnalysis/", filename="qualVar")
+@ 
+The function creates an HTML file "qualVarAnalysis/qualVar.htm", containing p-values and links toward  boxplots. 
+If you would  like to plot densities rather than boxplots, please use \verb$'typePlot=density'$.
+
+An example of  boxplot is represented below for the third component and the ER status. As suggested by the heatmap, the distribution of the samples on this component is strongly associated with their ER status, the latter coming up at the positive end of the component.      
+%As in \ref{fig:exhisto} we can see that the muscle-invasive tumors (T2+) seem to over-express the contributing genes of this component.
+\begin{figure}[htbp]
+  \centering 
+\includegraphics[width=0.8\linewidth]{mainz/qualVarAnalysis/plots/3_er.png}
+  \caption[Example of boxplot representing the distribution of breast tumors on the second component according to their ER status.]{ 
+Example of boxplot representing the distribution of ER status on the third component.
+The Wilcoxon test $p$-value is available in the title of the plot. 
+The legend indicates that the ER- tumors are represented in beige while ER+ are represented in light pink. The number of tumors in each group is given between brackets. 
+The gene witness is \textit{KRT16}. Each tumor sample is represented as a square point in the vertical line at the left end of the boxplots whose color denotes its  amount of expression of the \textit{KRT16} gene. The scale of these colors is denoted by a legend at the upper right of the graph.}
+  \label{fig:exdens}
+\end{figure}
+
+
+When a variable is quantitative, its association with a component can be studied by computing its correlation with the sample contributions. The function \Robject{quantVarAnalysis} allows to compute the correlation tests and to draw the corresponding scatter plots using \Rpackage{ggplot2}.
+
+<<quantVarAn, echo=TRUE, print=FALSE>>=
+### Quantitative variables
+## Compute pearson correlations between variable 'age' and the sample contributions
+## on all components.
+## We are interested in correlations exceeding 0.3 in absolute value, and plots will only be drawn
+## for correlations exceeding this threshold.
+resQuant <- quantVarAnalysis(params=params, icaSet=icaSetMainz, keepVar="age", 
+                             typeCor="pearson", cutoffOn="cor",
+                             cutoff=0.3, adjustBy="none", 
+                             path="quantVarAnalysis/", filename="quantVar")
+@ 
+
+The absolute correlation between age and sample contributions exceeds 0.3 only for the third component.
+<<quantVarAncor, echo=TRUE, print=FALSE>>=
+resQuant$cor[3]
+@ 
+
+The corresponding scatter plot is available in Figure~\ref{fig:exscatter}. A tendency of the women whose tumors are located at the positive end of the component to be younger indeed appears. 
+
+The function creates a HTML file "quantVar.htm" containing correlations values, p-values, and links toward scatter plots.
+
+\begin{figure}[htbp]
+  \centering 
+\includegraphics[width=0.8\linewidth]{mainz/quantVarAnalysis/plots/3_age.png}
+  \caption[Scatter plot of age vs sample contributions.]{Scatter plot of AGE vs sample contributions. The gene witness is \textit{KRT16}. At the bottom of the plot, each sample is represented by a square point whose colour denotes the expression value of the \textit{KRT16} gene. The scale of these colors is denoted by a legend at the upper right of the graph. Note that the gene expression profiles were centered to have mean zero. }
+  \label{fig:exscatter}
+\end{figure}
+
+
+
+\subsubsection{Clustering of the samples according to each component}
+
+
+\paragraph{Selection of samples associated with a component}
+The selection of the samples associated with a component may be needed for experimental needs.
+ICA provides a continuous signal describing the activity of the components on the samples through the mixing matrix $A$. Genes which are contributors on the components can also be selected through their projections in matrix $S$ (using an arbitrary threshold).
+Since the signal is continuous the selection of the samples contributing to a component rely on some arbitrary choices regarding: 
+\begin{itemize}
+\item the  data on which the clustering has to be applied on: clustering in one dimension on columns of $A$, or clustering on the expression matrix restricted to the contributing genes of the components?
+\item the number of clusters to use: two clusters if it is considered as a strictly bimodal signal, or three clusters if we assume the existence of a group of samples with an average behavior?
+\item the method of clustering to use: k-means, clustering based on mixture Gaussian modelling, hierarchical clustering, ...
+\end{itemize}
+
+We recommend to cluster the samples by using their contributions to the component. \\
+If you would like to perform the clustering on the original data restricted to the contributing genes, please remind that they won't necessarily represent the whole pattern of expression captured by the component, the latter having been defined on all the features and not on a subset of them. 
+
+
+\paragraph{Study the bimodality of sample contributions in matrix \Robject{A}}
+
+The distribution of the sample contributions on a component  (contained in matrix $A$) is often bimodal, each mode corresponding to samples that over- or under-express the contributing genes of the component. 
+The sample contributions can be visualized with histograms, overlaid by Gaussian mixtures computed, in this package, using package  \Rpackage{mclust} \cite{FraleyRaftery2002,MclustSoftwareManual2006}. When a strong bimodal distribution is observed, the intersection of the two Gaussian infered by function \verb$Mclust$  may be used to cluster the tumors. 
+Here is an example by imposing two Gaussian on every vector of sample contributions:
+<<plotMix, echo=TRUE, print=FALSE>>=
+resmix <- plotAllMix(A=A(icaSetMainz), nbMix=2, nbBreaks=50)
+@ 
+%For the clustering infered by the Gaussian mixtures to be accurate, a large number of samples is recommended. 
+
+The position of sub-groups of samples can be plotted in this histogram, in order to see if they are located at a specific end of the components. The function \Robject{plotPosAnnotInComp} allows to do so. 
+The samples distributed at one end of component generally have either a strong over- or under-expression of its contributing genes.
+
+Here is the example of the distribution of the tumors according to their ER status on the second component.
+
+
+<<stageOnHist, echo=TRUE, results=hide, print=FALSE, eval=FALSE>>=
+## plot the positions of the samples on the second component according to their ER status
+## (in a file "er.pdf") 
+plotPosAnnotInComp(icaSet=icaSetMainz, keepVar=c("er"), keepComp=2,  
+                   funClus="Mclust")
+@ 
+\begin{figure}[htbp]
+  \centering 
+\includegraphics[width=1\linewidth]{images/erhist.png}
+  \caption[Distribution of ER status on the second component.]{Distribution of ER status on the second component.. The histogram of each group is superimposed on the global histogram including contributions of all tumor samples. Two Gaussians were fitted on the distribution by mixture modeling using package \Rpackage{mclust}. The  $p$-value at the top of the histogram provides the result of a chi-square test of association between each group and the clusters of samples formed by the two Gaussians. 
+}
+  \label{fig:exhisto}
+\end{figure}
+
+Again, we can see that the negative end of the IC defines a cluster of tumors almost exclusively constituted of ER- tumors, while the ER+ tumors are primarily located on its right side. The expression profile of the gene witness, \textit{KRT16}, indicates that the negative side corresponds to the over-expression of this gene and its counterparts compared to the positive side. 
+
+\paragraph{Cluster samples, function \Robject{clusterSamplesByComp}}
+
+The function \Robject{clusterSamplesByComp} allows to cluster the samples using either the mixing matrix $A$ or the original data matrix restricted to the contributing individuals. The clustering can be performed using centroid-based clustering (function \Robject{kmeans}), hierarchical clustering (through functions \Robject{hclust} and \Robject{agnes}), Gaussian mixture models (using function \Robject{Mclust} or package \Rpackage{mclust}), or Partitioning Around Medoids (PAM) (functions \Robject{pam} and \Robject{pamk}).
+ 
+The second component displays a bimodal distribution, we cluster the samples using the vector of sample contributions:
+<<cluster1, echo=TRUE>>=
+## clustering of the samples in 1-dim using the vector 
+## of sample contributions of the two first components 
+## and Gaussian mixture modeling (Mclust)
+clus1 <- clusterSamplesByComp(params=params, icaSet=icaSetMainz[,,,1:2],
+                              funClus="Mclust", clusterOn="A", nbClus=2, filename="comp1Mclust")
+
+## The obtained clusters are written in the file "comp1Mclus.txt" of the result path.
+clus1$clus[[2]][1:5]
+@ 
+
+
+It is also possible to perform several clusterings, using different algorithms or levels, with function \Robject{clusterSamplesOnComp\_multiple}.  
+We can for example compare the clustering performed with k-means applied to the vector of sample contributions and to the expression matrix restricted to the contributing genes:
+<<cluster2, echo=TRUE>>=
+clus2 <- clusterSamplesByComp_multiple(params=params, icaSet=icaSetMainz[,,1:2], 
+                                     funClus="kmeans", clusterOn=c("A","S"), level="features", 
+                                     nbClus=2, filename="comparKmeans")
+
+## The obtained clusters and their comparison with adjusted Rand indices are written 
+## in file "comparKmeans.txt" of the result path.
+
+## Both clustering results are stored in a common data.frame
+head(clus2$clus)
+## Access Rand index
+clus2$comparClus
+@ 
+
+Once a sample clustering has been computed, one can be interested in its association with the qualitative variables. 
+Function \Robject{clusVarAnalysis} enables to perform the chi-square tests of independence to study the association between the clustering obtained on each component and the qualitative variables. It also draws the barplot to show the distribution of the variable levels across the clusters:
+<<clus2var, echo=TRUE, eval=FALSE>>=
+## Test the association between the clustering obtained by Mclust for the first
+## component and the variables:  
+clus2var <- clusVarAnalysis(icaSet=icaSetMainz[,,1:2], params=params, 
+                            keepVar=c("er","grade"), 
+                            resClus=clus1$clus, funClus="Mclust", adjustBy="none", 
+                            doPlot=TRUE, path="clus2var/", filename="resChitests-Mcluscomp1")
+## Look at the filename which contains p-values and links to the barplots
+## p-values are also contained in the ouput of the function:
+clus2var
+
+
+@ 
+<<clus2var, echo=FALSE, eval=FALSE>>=
+structure(list(`1` = c(1.657e-06, 2.315e-08), `2` = c(6.775e-07, 
+0.0001899)), .Names = c("1", "2"), row.names = c("er", "grade"
+), class = "data.frame")
+@
+
+\subsubsection{Comparison of \Rpackage{IcaSet} objects, function \Robject{runCompareIcaSets}}
+
+
+\paragraph{Visualization of the correspondence between independent components with correlation-based graphs}
+\label{method_corGraphs}
+
+We can study the association between ICs computed on $n$ different datasets using correlation graphs. 
+In these graphs, each IC is represented as a node whose color indicates the dataset, and the edge thickness is proportional to the amount of correlation between the two ICs it links.  \\
+\noindent Hereafter we will denote by $C_{M,n}$ the $n^{th}$ component from dataset $M$. \\
+
+The relationship between the components is restricted to correlation maximum: an edge connecting a component $C_{A,i}$ to a component $C_{B,j}$ means that component $C_{A,i}$ is the most correlated component to $C_{B,j}$ among all the components $C_{A,i' (i' \neq i)}$ from the dataset $A$. The reciprocity of the link (i.e. the presence of an edge binding $C_{B,j}$ to $C_{A,i}$) reinforces the association between the two components. \\
+
+
+In R, the graph can be visualized with function \Robject{tkplot}, using  the  ``fruchterman.reingold'' layout which attends to attribute the length of the edge according to one of its attribute, here the absolute correlation coefficient between the two components it links. \\
+The edge thickness is also attributed according to the absolute correlation value (the higher the absolute correlation value is, the thicker the edge thickness is).\\
+Highly reproducible components appear in the graph as a subset of $n$ interconnected  nodes of different colors (quasi-cliques). 
+A way to highlight these quasi-cliques is obtained by coloring in black only edges linking reciprocal node pairs (a node pair is said to be reciprocal if there are edges between them in both directions). Non-reciprocal edges appear in grey. It allows to highlight the components with a high level of reproducibility.
+
+\paragraph{Example: Comparison of four \Rpackage{IcaSet} objects}
+
+As an example we will compare four ICA decompositions obtained on four different gene expression datasets of breast tumors (including the Mainz data used above).\\
+%The four \Rpackage{IcaSet} objects have been pre-stored  to avoid lengthy downloading and formatting.
+%The ICA was not computed using \verb$R$ but using \Rpackage{matlab} with package \Rpackage{icasso} \cite{Himberg2004Validating} (using 500 iterations) which is based on the FastICA algorithm.\\
+We build an instance of \Rpackage{IcaSet} for each of the three datasets:
+
+<<tuut, echo=TRUE, eval=FALSE, print=FALSE>>=
+## load three other breast cancer datasets also based on  Affymetrix HG-U133a microarray
+library(breastCancerUPP)
+library(breastCancerTRANSBIG)
+library(breastCancerVDX)
+data(upp)
+data(transbig)
+data(vdx)
+## function to build IcaSet instances from these three datasets
+treat <- function(es, annot="hgu133a.db") {
+    es <- selectFeatures_IQR(es,10000)
+    exprs(es) <- t(apply(exprs(es),1,scale,scale=FALSE))
+    colnames(exprs(es)) <- sampleNames(es)
+    resJade <- runICA(X=exprs(es), nbComp=5, method = "JADE", maxit=10000)
+    resBuild <- buildIcaSet(params=buildMineICAParams(), A=data.frame(resJade$A), S=data.frame(resJade$S),
+                            dat=exprs(es), pData=pData(es), refSamples=character(0),
+                            annotation=annot, typeID= typeIDmainz,
+                            chipManu = "affymetrix", mart=mart)
+    icaSet <- resBuild$icaSet
+}
+icaSetUpp <- treat(upp, annot="hgu133plus2.db")
+icaSetVdx <- treat(vdx)
+icaSetTransbig <- treat(transbig)
+@ 
+
+%Each \Rpackage{IcaSet} correspond to different types of microarray (Mainz: Affymetrix HG-U133A, CIT: Affymetrix HG-U133Plus2, Kim: Illumina Human-6 BeadChip v2, Stransky: Affymetrix HG-U13395A). We thus need a level of annotation shared across the \Rpackage{IcaSet} objects to compute the correlation between pairs of components. 
+Each \Rpackage{IcaSet} was annotated at the gene level using Gene Symbols. We will therefore compute correlation between gene projection values stored in slot \verb$SByGene$ of each \Rpackage{IcaSet}.\\
+
+Pearson correlation is used as a measure of association between the gene projections. The correlation graph can be build with function \Robject{runCompareIcaSets}:
+
+
+<<compareAn, echo=TRUE, eval=FALSE, print=FALSE>>=
+resGraph <- runCompareIcaSets(icaSets=list(icaSetMainz, icaSetUpp, 
+                              icaSetTransbig, icaSetVdx), 
+                              labAn=c("Mainz", "Upp","Transbig","Vdx"), 
+                              type.corr="pearson", level="genes", 
+                              cutoff_zval=0, fileNodeDescr="nodeDescr.txt", 
+                              fileDataGraph="dataGraph.txt", tkplot=TRUE)
+@ 
+
+
+
+Get the colors attributed to each dataset using the element \Robject{nodeAttrs} of \Robject{resGraph}:
+<<compareAnColors, echo=TRUE, eval=FALSE, print=FALSE>>=
+barplot(names.arg=unique(resGraph[[2]]$labAn),height=rep(1,4), 
+        col=unique(resGraph[[2]]$col))
+@ 
+The Mainz dataset is represented in blue. Three cliques of four components appear in the correlation-based graph, they include the first three components of the Mainz dataset. The latter are therefore reproducible across the four datasets and thus capture coexpression patterns shared across different breast cancer cohorts. We showed that the first component was associated with the cell cycle, the second with immune reaction, and the third one with epiderm development. The third component also included \textit{EGFR} and several keratins among its contributing genes, and defined a cluster of samples constituted by a subset of the ER- breast tumors. The latter typically corresponds to the subtype of breast cancer known as "basal-like".  
+
+\begin{figure}[htbp]
+  \centering 
+\includegraphics[width=0.8\linewidth]{images/graphBreast.jpg}
+\caption[Correlation-based graph representing association between independent components obtained on four expression data of breast cancer samples.]{Correlation-based graph representing association between independent components obtained on four expression data of breast cancer samples. Each node denotes an IC and their colors represent the dataset they originate from. Edge thickness denotes the amount of correlation between the two ICs it links. Black edges denote reciprocal nodes.}
+  \label{fig:corGraph}
+\end{figure}
+
+
+Here we chose to base the correlation on all genes. By modifying the argument \verb$cutoff_zval$, we could have chosen to base the correlations on genes with contribution values higher than a given threshold. Using  \verb$cutoff_zval=1$, only the projections whose scaled values are not located within the circle of radius 1 when considering a pair of components are used to compute the correlation. In practice, the function will be much faster when \verb$cutoff_zval=0$, since in that case pairs of components are not treated individually.\\
+
+Created files nodeDescr.txt and dataGraph.txt may be used as inputs into Cytoscape \cite{Cline2007Integration} which could be a way to obtain a more elegant correlation graph.
+
+\paragraph{Intersection and union between contributing genes}
+
+When cliques appear in the correlation-based graph, you may want to compare the genes having high projections on the components included in the clique. The function  \Robject{compareGenes} allows to compare components of different icaSets and returns the common genes ordered by their median rank across the components. Intersection or union of the genes can be considered.  
+
+We study the common contributing genes of the components included in two different cliques of the graph using \Robject{compareGenes}:
+
+<<inter1, echo=TRUE, eval=FALSE, print=FALSE>>=
+## comparison of four components included in the clique of the correlation-based graph
+# that includes the second component of Mainz.
+inter <- compareGenes(keepCompByIcaSet =   c(2,2,2,2),  
+                      icaSets = list(icaSetMainz, icaSetTransbig, icaSetUpp, icaSetVdx),
+                      lab=c("Mainz", "Transbig", "Upp", "Vdx"), cutoff=3, 
+                      type="intersection",  annotate=F)
+head(inter)
+@ 
+<<inter1bis, eval=TRUE, echo=FALSE>>=
+structure(list(min_rank = structure(c(1L, 12L, 22L, 12L, 31L, 
+31L), .Label = c("1", "10", "101", "11", "12", "13", "14", "16", 
+"17", "18", "19", "2", "20", "21", "22", "23", "24", "25", "26", 
+"27", "29", "3", "30", "31", "33", "34", "35", "36", "37", "38", 
+"4", "40", "41", "43", "46", "47", "5", "51", "52", "53", "54", 
+"58", "6", "63", "69", "7", "70", "74", "8", "9"), class = "factor"), 
+    median_rank = c(1, 2, 3, 5, 5.5, 6), ranks = c("1,1,1,1", 
+    "2,2,3,2", "3,3,4,3", "5,8,2,5", "4,7,9,4", "6,4,6,6"), scaled_proj = c("-8.9,-9.2,9.2,-9.3", 
+    "-8.4,-8.7,7.9,-8.9", "-7,-8.3,7.7,-8.8", "-6.4,-6.1,8.4,-7.6", 
+    "-6.6,-6.5,6.7,-7.7", "-6.3,-7.8,7.1,-7.6")), .Names = c("min_rank", 
+"median_rank", "ranks", "scaled_proj"), row.names = c("IGL@", 
+"IGKV4-1", "IGLV2-23", "NKG7", "IGHM", "TNFRSF17"), class = "data.frame")
+@ 
+<<inter2, eval=FALSE, echo=TRUE>>=
+## comparison of four components included in the clique of the correlation-based graph
+# that includes the third component of Mainz.
+inter <- compareGenes(keepCompByIcaSet = c(3,3,3,1), 
+                      icaSets = list(icaSetMainz, icaSetTransbig, icaSetUpp, icaSetVdx),
+                      lab=c("Mainz", "Transbig", "Upp", "Vdx"), cutoff=3, 
+                      type="intersection",  annotate=F)
+head(inter)
+@ 
+<<inter2bis, eval=TRUE, echo=FALSE>>=
+structure(list(min_rank = structure(c(1L, 7L, 21L, 7L, 7L, 16L
+), .Label = c("1", "10", "11", "16", "17", "18", "2", "23", "24", 
+"25", "26", "3", "32", "38", "39", "4", "40", "42", "43", "49", 
+"5", "51", "58", "6", "7", "8", "9"), class = "factor"), median_rank = c(1, 
+4, 6.5, 8.5, 9.5, 9.5), ranks = c("1,1,1,3", "5,5,3,2", "7,7,6,5", 
+"13,2,4,21", "2,15,15,4", "4,31,12,7"), scaled_proj = c("7.7,8.7,8.1,7.2", 
+"6.3,7.2,7.3,7.3", "6.2,7.1,5.9,6.5", "5.7,7.3,7,5.1", "7.3,5.8,5.4,7", 
+"6.3,4.6,5.6,6.2")), .Names = c("min_rank", "median_rank", "ranks", 
+"scaled_proj"), row.names = c("GABRP", "MIA", "SERPINB5", "KRT14", 
+"KRT16", "KRT81"), class = "data.frame")
+@ 
+
+The common contributing genes of the first clique are strongly associated in the immune reaction and many of them are markers of lymphocytes, while the common contributing genes of the second clique include several keratins (\textit{KRT5 KRT14, KRT15, KRT16, KRT17, KRT23, ...}) and other known markers of the basal-like breast subtype.
+
+
+\bibliographystyle{plainnat}
+\bibliography{bibli}
+
+
+\end{document}
