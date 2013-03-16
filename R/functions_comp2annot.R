@@ -399,7 +399,7 @@ plotAllMix <- function (mc, A, nbMix = NULL, pdf,  nbBreaks = 20, xlim=NULL) {
 
         
         if (!missing(pdf))
-            pdf(file, width = 9, height = 9, title=file)
+            pdf(pdf, width = 9, height = 9, title=file)
         
 	par(mfrow = c(3,3))
 

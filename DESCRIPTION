@@ -1,8 +1,8 @@
 Package: MineICA
 Type: Package
 Title: Analysis of an ICA decomposition obtained on genomics data
-Version: 0.1.0
-Date: 2012-01-21
+Version: 0.99.1
+Date: 2012-03-16
 Author: Anne Biton
 Maintainer: <anne.biton@gmail.com>
 Description: The goal of MineICA is to make easier the interpretation of the
@@ -14,17 +14,58 @@ Description: The goal of MineICA is to make easier the interpretation of the
 License: GPL-2
 LazyLoad: yes
 BiocViews: Bioinformatics, Visualizations, MultipleComparisons
-Imports: AnnotationDbi, lumi, fpc, lumiHumanAll.db
-Depends: R (>= 2.10), Biobase, plyr, ggplot2, scales, foreach, xtable,
-        biomaRt, gtools, GOstats, cluster, marray, mclust,
-        RColorBrewer, colorspace, igraph, Rgraphviz, graph, annotate,
-        Hmisc, fastICA, JADE, methods
-Suggests: biomaRt, GOstats, cluster, hgu133a.db, mclust, igraph,
-        breastCancerMAINZ, breastCancerTRANSBIG, breastCancerUPP,
-        breastCancerVDX
+Imports:
+    AnnotationDbi,
+    lumi,
+    fpc,
+    lumiHumanAll.db
+Depends:
+    R (>= 2.10),
+    Biobase,
+    plyr,
+    ggplot2,
+    scales,
+    foreach,
+    xtable,
+    biomaRt,
+    gtools,
+    GOstats,
+    cluster,
+    marray,
+    mclust,
+    RColorBrewer,
+    colorspace,
+    igraph,
+    Rgraphviz,
+    graph,
+    annotate,
+    Hmisc,
+    fastICA,
+    JADE,
+    methods
+Suggests:
+    biomaRt,
+    GOstats,
+    cluster,
+    hgu133a.db,
+    mclust,
+    igraph,
+    breastCancerMAINZ,
+    breastCancerTRANSBIG,
+    breastCancerUPP,
+    breastCancerVDX
 Enhances: doMC
-Collate: 'AllClasses.R' 'AllGeneric.R' 'methods-IcaSet.R'
-        'methods-MineICAParams.R' 'compareAnalysis.R'
-        'functions_comp2annot.R' 'functions_comp2annottests.R'
-        'functions_enrich.R' 'functions.R' 'heatmap.plus.R'
-        'heatmapsOnSel.R' 'runAn.R' 'compareGenes.R'
+Collate:
+    'AllClasses.R'
+    'AllGeneric.R'
+    'methods-IcaSet.R'
+    'methods-MineICAParams.R'
+    'compareAnalysis.R'
+    'functions_comp2annot.R'
+    'functions_comp2annottests.R'
+    'functions_enrich.R'
+    'functions.R'
+    'heatmap.plus.R'
+    'heatmapsOnSel.R'
+    'runAn.R'
+    'compareGenes.R'
