@@ -315,7 +315,7 @@ runAn <- function(params,
             qualVar <- qualVar[-indDel]
         
         if (length(annot2col(params))==0)
-            colours <- annot2Color(pData(icaSet)[,qualVar])
+            colours <- annot2Color(pData(icaSet)[,qualVar,drop=FALSE])
         else
             colours <- annot2col(params)
 

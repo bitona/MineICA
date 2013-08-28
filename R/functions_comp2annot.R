@@ -648,9 +648,9 @@ plotDens2classInComp_plotOnly <- function (annot,
                     else if (typePlot == "boxplot") {
                         g <- g + geom_boxplot(aes(x=interest, y = comp, fill = interest),
                                               position = "identity", data = annot,
-                                              colour = "black") + scale_x_discrete(colAnnot) + scale_y_continuous(if (is.null(ylab)) "Sample contributions" else ylab)
+                                              colour = "black", outlier.shape = if (addPoints) NA else 16) + scale_x_discrete(colAnnot) + scale_y_continuous(if (is.null(ylab)) "Sample contributions" else ylab)                        
                         if (addPoints)
-                            g <- g + geom_point(aes(x=interest, y = comp, fill = interest),data = annot,color="#1A1A1A99")   #  + coord_flip()+
+                            g <- g + geom_jitter(aes(x=interest, y = comp, fill = interest), data = annot, color="#1A1A1A99", size=1.9, position=position_jitter(width=.2)) #+ theme_bw()#  + coord_flip()+position="jitter", 
                     }
 
                 }
@@ -662,8 +662,11 @@ plotDens2classInComp_plotOnly <- function (annot,
 			data_ref$y <- rep(x = -0.02,times = nrow(data_ref))
 			g <- g + geom_point(aes(x=comp,y=y),data = data_ref,  fill = "green", shape = 24, size = 1.7)
                     }
-                    else {
-			data_ref$x <- rep(x = 0.1,times = nrow(data_ref))
+                    else {                        
+                        if (!is.null(geneExpr))
+                            data_ref$x <- rep(x = 0.1,times = nrow(data_ref))
+                        else
+                            data_ref$x <- rep(x = 0.5,times = nrow(data_ref))
 
 			g <- g + geom_point(aes(y=comp,x=x),data = data_ref,  fill = "green", shape = 23, size = 3)
                         

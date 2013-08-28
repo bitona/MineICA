@@ -48,7 +48,7 @@
   \code{\link{annotReciprocal}}.}
 
   \item{tkplot}{If TRUE, performs interactive plot with
-  function \code{tkplot}, else uses \code{plot.igraph}}
+  function \code{tkplot}, else uses \code{plot.igraph}.}
 
   \item{\dots}{Additional parameters as required by
   \code{tkplot}.}

@@ -42,13 +42,13 @@
 
 \maketitle
 \begin{abstract}
-  \Rpackage{MineICA} supplies a framework for the storage and the study of a decomposition resulting from the application of independent component analysis (ICA) to transcriptomic data.
+  \Rpackage{MineICA} supplies a framework for the storage and the study of a decomposition resulting from the application of independent component analysis (ICA) to transcriptomic data. It allows to integrate additional data associated with the samples (other molecular data, as well as clinical and pathological data) and data associated with the genes.
   It defines a new class \Rpackage{IcaSet} extending the class \Rpackage{eSet} of the package \Rpackage{Biobase}, which allows to store the inputs (genomic dataset and sample information) and outputs (mixing and source matrix) of ICA.
   %\Rpackage{MineICA} helps to interpret the ICA outputs and to compare ICA decompositions obtained on different data through correlation graphs. 
   \Rpackage{MineICA} helps the biological interpretation of the components by studying their association with variables (e.g sample annotations) and biological processes, and enables the comparison of components from different datasets using correlation-based graph.
   %the mixing matrix $A$, containing the sample contributions on the components. \Rpackage{MineICA} also helps the interpretation of the source matrix $S$, containing the contributions of the features (e.g genes) to component, by annotating the contributing features and study their association with known biological processes.
   In practice, by creating interactive summarization of the results and comprehensive plots, \Rpackage{MineICA} makes much easier the
-  interpretation of the numerous data resulting from the application of ICA to transcriptomic data. 
+  interpretation of the numerous data resulting from the application of ICA to transcriptomic data.   
 \end{abstract}
 
 \section{Introduction}

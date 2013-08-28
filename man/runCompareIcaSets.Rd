@@ -177,8 +177,9 @@ icaSettoy2 <- buildIcaSet(params=params, A=data.frame(resJade2$A), S=data.frame(
                           dat=dat2, alreadyAnnot=TRUE)$icaSet
 
 ## compare IcaSet objects
+## use tkplot=TRUE to get an interactive graph
 rescomp <- runCompareIcaSets(icaSets=list(icaSettoy1, icaSettoy2), labAn=c("toy1","toy2"),
-                             type.corr="pearson", level="genes")
+                             type.corr="pearson", level="genes", tkplot=FALSE)
 
 
 \dontrun{
