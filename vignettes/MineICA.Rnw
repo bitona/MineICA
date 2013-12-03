@@ -562,7 +562,7 @@ To obtain a biological interpretation of the component, it can be useful to stud
 In order to identify the gene sets which are enriched in the list of selected (contributing) genes, the function \Robject{runEnrich} uses \verb$R$ \verb$GOstats$ package \cite{Falcon2007Using} which makes use of a hypergeometric distribution to test the over-representation of a gene set in a given list of genes.
 <<runEnrich, echo=TRUE, eval=FALSE>>=
 ## run enrichment analysis on the first three components of icaSetMainz, 
-## using gene sets from KEGG and ontology 'Biological Process' (BP) of Gene Ontology (GO)
+## using gene sets from the ontology 'Biological Process' (BP) of Gene Ontology (GO)
 resEnrich <- runEnrich(params=params,icaSet=icaSetMainz[,,1:3],
                        dbs=c("GO"), ontos="BP")
 @ 
@@ -694,13 +694,13 @@ When a variable is quantitative, its association with a component can be studied
 ## for correlations exceeding this threshold.
 resQuant <- quantVarAnalysis(params=params, icaSet=icaSetMainz, keepVar="age", 
                              typeCor="pearson", cutoffOn="cor",
-                             cutoff=0.3, adjustBy="none", 
+                             cutoff=0.3, adjustBy="none",  
                              path="quantVarAnalysis/", filename="quantVar")
 @ 
 
-The absolute correlation between age and sample contributions exceeds 0.3 only for the third component.
+The absolute correlation between age and sample contributions exceeds 0.3 only for the second component.
 <<quantVarAncor, echo=TRUE, print=FALSE>>=
-resQuant$cor[3]
+resQuant$cor[2]
 @ 
 
 The corresponding scatter plot is available in Figure~\ref{fig:exscatter}. A tendency of the women whose tumors are located at the positive end of the component to be younger indeed appears. 
@@ -709,7 +709,7 @@ The function creates a HTML file "quantVar.htm" containing correlations values, 
 
 \begin{figure}[htbp]
   \centering 
-\includegraphics[width=0.8\linewidth]{mainz/quantVarAnalysis/plots/3_age.png}
+\includegraphics[width=0.8\linewidth]{mainz/quantVarAnalysis/plots/2_age.png}
   \caption[Scatter plot of age vs sample contributions.]{Scatter plot of AGE vs sample contributions. The gene witness is \textit{KRT16}. At the bottom of the plot, each sample is represented by a square point whose colour denotes the expression value of the \textit{KRT16} gene. The scale of these colors is denoted by a legend at the upper right of the graph. Note that the gene expression profiles were centered to have mean zero. }
   \label{fig:exscatter}
 \end{figure}
