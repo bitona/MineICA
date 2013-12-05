@@ -648,9 +648,9 @@ plotDens2classInComp_plotOnly <- function (annot,
                     else if (typePlot == "boxplot") {
                         g <- g + geom_boxplot(aes(x=interest, y = comp, fill = interest),
                                               position = "identity", data = annot,
-                                              colour = "black", outlier.shape = if (addPoints) NA else 16) + scale_x_discrete(colAnnot) + scale_y_continuous(if (is.null(ylab)) "Sample contributions" else ylab)                        
+                                              colour = "black", outlier.shape = if (addPoints) NA else 16) + scale_x_discrete(colAnnot) + scale_y_continuous(if (is.null(ylab)) "Sample contributions" else ylab) + theme_bw()                       
                         if (addPoints)
-                            g <- g + geom_jitter(aes(x=interest, y = comp, fill = interest), data = annot, color="#1A1A1A99", size=1.9, position=position_jitter(width=.2)) #+ theme_bw()#  + coord_flip()+position="jitter", 
+                            g <- g + geom_jitter(aes(x=interest, y = comp, fill = interest), data = annot, color="#1A1A1A99", size=1.9, position=position_jitter(width=.2))+ theme_bw()#  + coord_flip()+position="jitter", 
                     }
 
                 }
@@ -1038,7 +1038,7 @@ m0.5="#A6CEE3", m1="#1F78B4", m1.5="#B2DF8A", m2="#33A02C", m2.5="#FB9A99", m3="
    patientsDoublePrel = c("260GIL"= "#8DD3C7","6FON" = "mistyrose4","318AKL" = "#FB8072","39VAS" = "#80B1D3", "74COU" =  "#FDB462",
   HM = "#8DD3C7", IGR = "#FB8072", HF = "#FDB462" )  
 
-	sousTypes = c(papillaire_pediculee = "paleturquoise4", papillaire_sessile = "turquoise4", papillaire = "turquoise4",solide_vegetante = "chartreuse4", ulceree_necrosee = "chocolate", ulceree_vegetante = "89", ulceree = "89",  plane = "gray30", autre = "gray30",autres = "gray30", "ER-"="bisque","ER+"="palevioletred1",
+	sousTypes = c(papillaire_pediculee = "paleturquoise4", papillaire_sessile = "turquoise4", papillaire = "turquoise4",solide_vegetante = "chartreuse4", ulceree_necrosee = "chocolate", ulceree_vegetante = "89", ulceree = "89",  plane = "gray30", autre = "gray30",autres = "gray30", "ER+"="bisque","ER-"="palevioletred1",
 	 classique = "paleturquoise4", epidermoede = "turquoise4", epidermoide = "turquoise4",micropapillaire = "chartreuse4", neuroendocrine = "violetred1", sarcomatoide = "violetred4",
         "endophytique" = "violetred1", "largesMassifs" = "chartreuse4", "plages" = "yellow", "travees_massifsPeuCohesifs" = "chocolate1", 
 "travees_petitsMassifs" = "chocolate4")

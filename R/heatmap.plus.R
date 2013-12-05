@@ -162,32 +162,33 @@ heatmap.plus = function (x, Rowv = NULL, Colv = if (symm) "Rowv" else NULL,
     }
     else iy <- 1:nr
 
-    ## add color breaks, extend the number of colorsd between the 25th and 75th quantiles
-    rm <- range(x)
-    qq1 <- quantile(unlist(x),0.25)
-    if (qq1 == rm[1])
-        qq1 <- quantile(unlist(x),0.35)
+    if (is.null(breaks)) {
+        ## add color breaks, extend the number of colorsd between the 25th and 75th quantiles
+        rm <- range(x)
+        qq1 <- quantile(unlist(x),0.25)
+        if (qq1 == rm[1])
+            qq1 <- quantile(unlist(x),0.35)
         
-    qq2 <- quantile(unlist(x),0.75)
-    nbCol <- length(heatmapCol)
-    extrNbCol <- floor(nbCol/4)-1
-    midNbCol <- floor(nbCol/2) 
-    breaks <- c(seq(from = rm[1], to = qq1, by = abs(qq1-rm[1])/extrNbCol),
-                seq(from = qq1, to = qq2, by = (qq2-qq1)/midNbCol),
-                seq(from = qq2, to = rm[2], by = (rm[2]-qq2)/extrNbCol))
+        qq2 <- quantile(unlist(x),0.75)
+        nbCol <- length(heatmapCol)
+        extrNbCol <- floor(nbCol/4)-1
+        midNbCol <- floor(nbCol/2) 
+        breaks <- c(seq(from = rm[1], to = qq1, by = abs(qq1-rm[1])/extrNbCol),
+                    seq(from = qq1, to = qq2, by = (qq2-qq1)/midNbCol),
+                    seq(from = qq2, to = rm[2], by = (rm[2]-qq2)/extrNbCol))
 
-    if (!is.null(breaks)) {
         image(x = 1:nc, y = 1:nr, z = x, xlim = 0.5 + c(0, nc), ylim = 0.5 + 
+              c(0, nr), axes = FALSE, xlab = "", ylab = "",
+              col = if (!is.null(heatmapCol)) heatmapCol else heat.colors(12),
+              breaks = breaks, ...)
+    }
+    else {
+            image(x = 1:nc, y = 1:nr, z = x, xlim = 0.5 + c(0, nc), ylim = 0.5 + 
               c(0, nr), axes = FALSE, xlab = "", ylab = "",
               col = if (!is.null(heatmapCol)) heatmapCol else heat.colors(12),
               breaks = breaks, ...) ## add colors
     }
     
-    else {
-        image(x = 1:nc, y = 1:nr, z = x, xlim = 0.5 + c(0, nc), ylim = 0.5 + 
-              c(0, nr), axes = FALSE, xlab = "", ylab = "",
-              col = if (!is.null(heatmapCol)) heatmapCol else heat.colors(12),...)
-    }
     
     axis(1, 1:nc, labels = labCol, las = 2, line = -0.5, tick = 0, 
         cex.axis = cexCol)

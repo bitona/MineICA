@@ -349,7 +349,7 @@ These witnesses can be automaticall selected with the function \Robject{selectWi
 <<witG, echo=TRUE>>=
 witGenes(icaSetMainz)[1:5]
 ## We can for example modify the second contributing gene 
-witGenes(icaSetMainz)[3] <- "KRT16"
+witGenes(icaSetMainz)[2] <- "KRT16"
 @ 
 
 
@@ -531,16 +531,16 @@ keepVar <- c("er","grade")
 ## heatmap with dendrogram
 resH <- plot_heatmapsOnSel(icaSet = icaSetMainz, selCutoff = 3, level = "genes", 
                            keepVar = keepVar,
-                           doSamplesDendro = TRUE, doGenesDendro = TRUE, keepComp = 3,
-                           heatmapCol = maPalette(low = "blue",high = "red", mid = "yellow", k=44),
+                           doSamplesDendro = TRUE, doGenesDendro = TRUE, keepComp = 2,
+                           heatmapCol = maPalette(low = "blue", high = "red", mid = "yellow", k=44),
                            file = "heatmapWithDendro", annot2col=annot2col(params))
 
 
 ## heatmap where genes and samples are ordered by contribution values
 resH <- plot_heatmapsOnSel(icaSet = icaSetMainz, selCutoff = 3, level = "genes", 
                            keepVar = keepVar,
-                           doSamplesDendro = FALSE, doGenesDendro = FALSE, keepComp = 3,
-                           heatmapCol = maPalette(low = "blue",high = "red", mid = "yellow", k=44),
+                           doSamplesDendro = FALSE, doGenesDendro = FALSE, keepComp = 2,
+                           heatmapCol = maPalette(low = "blue", high = "red", mid = "yellow", k=44),
                            file = "heatmapWithoutDendro", annot2col=annot2col(params))
 
 @ 
@@ -569,78 +569,80 @@ resEnrich <- runEnrich(params=params,icaSet=icaSetMainz[,,1:3],
 
 The output \Robject{resEnrich} is a list whose each element contains results obtained on each database for every component tested. For each component, three enrichment results are available, depending on how contributing genes are selected: on the absolute projection values (``both''), on the positive projection (``pos''), and on the negative projection (``neg'').
 
-We can see that the first component is associated with the cell cycle, the second with immune reaction, and the third component with epiderm development: 
+We can see that the first component is associated with immune reaction, the second component with epiderm development, and the third component with cell cycle: 
 
-<<runEnrich2, echo=TRUE, print=FALSE, eval=FALSE>>=
+
+<<runEnrich3, echo=TRUE, print=FALSE, eval=FALSE>>=
 ## Access results obtained for GO/BP for the first three components 
-# First component, when gene selection was based  on the absolute projection values
-head(resEnrich$GO$BP[[1]]$both)
+# First component, when gene selection was based on the negative projection values
+head(resEnrich$GO$BP[[1]]$left)
+@ 
+<<runEnrich3bis, echo=FALSE, print=FALSE, eval=TRUE>>=
+structure(list(GOBPID = c("GO:0006955", "GO:0002694", "GO:0050867", 
+"GO:0002429", "GO:0050863", "GO:0051251"), Pvalue = c(4.13398630676443e-16, 
+3.53565704068228e-14, 1.0598364083037e-11, 2.10474926262594e-11, 
+2.96408182272612e-11, 3.41481775787203e-11), OddsRatio = c(16.1139281129653, 
+10.2399932157395, 10.34765625, 13.1975308641975, 14.5422535211268, 
+14.3646536754775), ExpCount = c(2.18081918081918, 3.24691805656273, 
+2.3821609862219, 1.56635242929659, 1.33711359063472, 1.35043827611395
+), Count = c(21L, 23L, 18L, 15L, 14L, 14L), Size = c(185L, 199L, 
+146L, 96L, 85L, 85L), Term = c("immune response", "regulation of leukocyte activation", 
+"positive regulation of cell activation", "immune response-activating cell surface receptor signaling pathway", 
+"regulation of T cell activation", "positive regulation of lymphocyte activation"
+), In_geneSymbols = c("CD7,MS4A1,CD27,CTSW,GZMA,HLA-DOB,IGHD,IGHM,IGJ,IL2RG,CXCL10,LTB,LY9,CXCL9,CCL18,CXCL11,CST7,FCGR2C,IL32,ADAMDEC1,ICOS", 
+"AIF1,CD2,CD3D,CD3G,CD247,CD27,CD37,CD38,HLA-DQB1,LCK,PTPRC,CCL5,CCL19,XCL1,EBI3,LILRB1,PTPN22,SIT1,TRBC1,TRAC,ICOS,MZB1,SLAMF7", 
+"AIF1,CD2,CD3D,CD3G,CD247,CD27,CD38,HLA-DQB1,LCK,PTPRC,CCL5,CCL19,XCL1,EBI3,LILRB1,TRBC1,TRAC,ICOS", 
+"CD3D,CD3G,CD247,CD38,HLA-DQB1,IGHG1,IGKC,IGLC1,LCK,PRKCB,PTPRC,PTPN22,TRBC1,TRAC,TRAT1", 
+"AIF1,CD3D,CD3G,CD247,HLA-DQB1,PTPRC,CCL5,XCL1,EBI3,PTPN22,SIT1,TRBC1,TRAC,ICOS", 
+"AIF1,CD3D,CD3G,CD247,CD38,HLA-DQB1,PTPRC,CCL5,XCL1,EBI3,LILRB1,TRBC1,TRAC,ICOS"
+)), .Names = c("GOBPID", "Pvalue", "OddsRatio", "ExpCount", "Count", 
+"Size", "Term", "In_geneSymbols"), row.names = c(NA, 6L), class = "data.frame")
+@ 
+
+<<runEnrich4, echo=TRUE, print=FALSE, eval=FALSE>>=
+# Second component
+head(resEnrich$GO$BP[[2]]$both, n=5)
+@ 
+<<runEnrich4bis, echo=FALSE, print=FALSE, eval=TRUE>>=
+structure(list(GOBPID = c("GO:0045104", "GO:0031581", "GO:0030318", 
+"GO:0070488", "GO:0072602", "GO:0034329"), Pvalue = c(2.16044773513962e-05, 
+6.04616151867683e-05, 0.000394387232705895, 0.000461592979000511, 
+0.000461592979000511, 0.00107959102524193), OddsRatio = c(19.6820175438597, 
+26.7826086956522, 14.4053511705686, Inf, Inf, 4.29841077032088
+), ExpCount = c(0.366751269035533, 0.237309644670051, 0.366751269035533, 
+0.0431472081218274, 0.0431472081218274, 2.09263959390863), Count = c(5L, 
+4L, 4L, 2L, 2L, 8L), Size = c(17L, 11L, 17L, 2L, 2L, 97L), Term = c("intermediate filament cytoskeleton organization", 
+"hemidesmosome assembly", "melanocyte differentiation", "neutrophil aggregation", 
+"interleukin-4 secretion", "cell junction assembly"), In_geneSymbols = c("DST,KRT14,KRT16,PKP1,SYNM", 
+"DST,COL17A1,KRT5,KRT14", "EDN3,KIT,SOX10,MLPH", "S100A8,S100A9", 
+"GATA3,VTCN1", "DST,CDH3,COL17A1,GPM6B,KRT5,KRT14,SFRP1,UGT8"
+)), .Names = c("GOBPID", "Pvalue", "OddsRatio", "ExpCount", "Count", 
+"Size", "Term", "In_geneSymbols"), row.names = c(NA, 6L), class = "data.frame")
+@ 
+<<runEnrich2, echo=TRUE, print=FALSE, eval=FALSE>>=
+# Third component, when gene selection was based  on the absolute projection values
+head(resEnrich$GO$BP[[3]]$both)
 @ 
 <<runEnrich2bis, echo=FALSE, print=FALSE, eval=TRUE>>=
-structure(list(GOBPID = c("GO:0000236", "GO:0031581", "GO:0045786", 
-"GO:0045104", "GO:0010389", "GO:0031577"), Pvalue = c(1.07618237962117e-05, 
-1.31817485465954e-05, 0.00010249730291343, 0.00199032614648593, 
-0.0022683621486939, 0.0022683621486939), OddsRatio = c(37.2312925170068, 
-93.6306818181818, 9.90278637770898, 36.7090301003344, 34.0807453416149, 
-34.0807453416149), ExpCount = c(0.144770177343467, 0.0497647484618169, 
-0.79623597538907, 0.0678610206297503, 0.0723850886717336, 0.0723850886717336
-), Count = c(4L, 3L, 6L, 2L, 2L, 2L), Size = c(32L, 11L, 176L, 
-15L, 16L, 16L), Term = c("mitotic prometaphase", "hemidesmosome assembly", 
-"negative regulation of cell cycle", "intermediate filament cytoskeleton organization", 
-"regulation of G2/M transition of mitotic cell cycle", "spindle checkpoint"
-), In_geneSymbols = c("BIRC5,CDC20,CDCA8,CENPN", "DST,COL17A1,KRT14", 
-"BIRC5,DST,CDC20,TOP2A,CDC45,MCM10", "DST,KRT14", "TOP2A,CDC45", 
-"BIRC5,CDC20")), .Names = c("GOBPID", "Pvalue", "OddsRatio", 
+structure(list(GOBPID = c("GO:0048285", "GO:0051301", "GO:0007067", 
+"GO:0007076", "GO:0000086", "GO:0006271"), Pvalue = c(2.1806594780167e-24, 
+7.64765765268202e-16, 4.85530963990747e-12, 9.30475956146815e-06, 
+1.95701394548966e-05, 5.65649365383205e-05), OddsRatio = c(16.8486540378863, 
+14.5290697674419, 17.0874279123414, Inf, 8.18195718654434, 27.2667509481669
+), ExpCount = c(3.1816533720087, 2.14748665070889, 1.18268700606506, 
+0.063633067440174, 1.18781725888325, 0.233321247280638), Count = c(32L, 
+21L, 14L, 3L, 8L, 4L), Size = c(150L, 107L, 65L, 3L, 56L, 11L
+), Term = c("organelle fission", "cell division", "mitosis", 
+"mitotic chromosome condensation", "G2/M transition of mitotic cell cycle", 
+"DNA strand elongation involved in DNA replication"), In_geneSymbols = c("BIRC5,BUB1,CCNA2,CDK1,CDC20,CDC25A,CENPE,IGF1,KIFC1,MYBL2,NEK2,AURKA,CCNB2,KIF23,DLGAP5,NDC80,UBE2C,TPX2,NCAPH,UBE2S,NUSAP1,ERCC6L,CDCA8,CEP55,CENPN,PBK,NCAPG,DSCC1,CDCA3,KIF18B,SKA1,ASPM", 
+"BUB1,CCNA2,CDK1,CDC20,CDC25A,CENPE,KIFC1,NEK2,AURKA,TOP2A,CCNB2,NDC80,UBE2C,TPX2,NCAPH,UBE2S,ERCC6L,CDCA8,NCAPG,CDCA3,SKA1", 
+"CCNA2,CDK1,CDC25A,CCNB2,TPX2,ERCC6L,CDCA8,CEP55,CENPN,PBK,CDCA3,KIF18B,SKA1,ASPM", 
+"NCAPH,NUSAP1,NCAPG", "BIRC5,CCNA2,CDK1,CDC25A,FOXM1,NEK2,CCNB2,MELK", 
+"MCM5,CDC45,GINS1,GINS2")), .Names = c("GOBPID", "Pvalue", "OddsRatio", 
 "ExpCount", "Count", "Size", "Term", "In_geneSymbols"), row.names = c(NA, 
 6L), class = "data.frame")
 @ 
 
-
-<<runEnrich3, echo=TRUE, print=FALSE, eval=FALSE>>=
-# Second component, when gene selection was based on the negative projection values
-head(resEnrich$GO$BP[[2]]$left)
-@ 
-<<runEnrich3bis, echo=FALSE, print=FALSE, eval=TRUE>>=
-structure(list(GOBPID = c("GO:0002253", "GO:0006959", "GO:0006955", 
-"GO:0002684", "GO:0048584", "GO:0002429"), Pvalue = c(1.52817137763709e-07, 
-4.81288352728676e-07, 1.22396115326329e-06, 6.35955291059939e-06, 
-9.25622695313701e-06, 1.06767418066984e-05), OddsRatio = c(18.3424657534247, 
-27.0398009950249, 28.8538011695906, 11.2582995951417, 7.46730769230769, 
-21.6746411483254), ExpCount = c(0.668838219326819, 0.317046688382193, 
-0.415086965018566, 1.11467391304348, 2.47991313789359, 0.308360477741585
-), Count = c(8L, 6L, 6L, 8L, 11L, 5L), Size = c(154L, 73L, 177L, 
-293L, 571L, 71L), Term = c("activation of immune response", "humoral immune response", 
-"immune response", "positive regulation of immune system process", 
-"positive regulation of response to stimulus", "immune response-activating cell surface receptor signaling pathway"
-), In_geneSymbols = c("IGHG1,IGKC,LCK,PTPRC,PTPN22,TRBC1,IGKV4-1,TRAT1", 
-"IGHG1,IGKC,SH2D1A,POU2AF1,CXCL13,IGKV4-1", "MS4A1,IGHD,IGHM,IGJ,CXCL9,CXCL11", 
-"IGHG1,IGKC,SH2D1A,CCL5,CXCL13,PTPN22,TRBC1,IGKV4-1", "IGHG1,IGKC,LCK,SH2D1A,PTPRC,CCL5,CXCL13,PTPN22,TRBC1,IGKV4-1,TRAT1", 
-"LCK,PTPRC,PTPN22,TRBC1,TRAT1")), .Names = c("GOBPID", "Pvalue", 
-"OddsRatio", "ExpCount", "Count", "Size", "Term", "In_geneSymbols"
-), row.names = c(NA, 6L), class = "data.frame")
-
-@ 
-
-<<runEnrich4, echo=TRUE, print=FALSE, eval=FALSE>>=
-# Third component
-head(resEnrich$GO$BP[[3]]$both, n=5)
-@ 
-<<runEnrich4bis, echo=FALSE, print=FALSE, eval=TRUE>>=
-structure(list(GOBPID = c("GO:0008544", "GO:0034330", "GO:0045104", 
-"GO:0060687", "GO:0060512"), Pvalue = c(8.06278555738841e-06, 
-0.000234608964462521, 0.00034947787505441, 0.000886129575409258, 
-0.000980819533506728), OddsRatio = c(7.96682149966821, 7.90315480557594, 
-27.305, 71.5032679738562, 18.1833333333333), ExpCount = c(1.40028954035469, 
-0.891965255157438, 0.143865363735071, 0.0479551212450235, 0.201411509229099
-), Count = c(9L, 6L, 3L, 2L, 3L), Size = c(146L, 93L, 15L, 5L, 
-21L), Term = c("epidermis development", "cell junction organization", 
-"intermediate filament cytoskeleton organization", "regulation of branching involved in prostate gland morphogenesis", 
-"prostate gland morphogenesis"), In_geneSymbols = c("EGFR,KRT5,KRT14,KRT15,KRT16,KRT17,KLK7,S100A7,CALML5", 
-"CDH3,GPM6B,KRT5,KRT14,SFRP1,UGT8", "KRT14,KRT16,SYNM", "ESR1,SFRP1", 
-"ESR1,SERPINB5,SFRP1")), .Names = c("GOBPID", "Pvalue", "OddsRatio", 
-"ExpCount", "Count", "Size", "Term", "In_geneSymbols"), row.names = c(NA, 
-5L), class = "data.frame")
-@ 
 
 The function \Robject{runEnrich} also writes these enrichment results in HTML files located in the sub-directory "GOstatsEnrichAnalysis" of the result path.
 
@@ -670,16 +672,16 @@ resQual <- qualVarAnalysis(params=params, icaSet=icaSetMainz,
 The function creates an HTML file "qualVarAnalysis/qualVar.htm", containing p-values and links toward  boxplots. 
 If you would  like to plot densities rather than boxplots, please use \verb$'typePlot=density'$.
 
-An example of  boxplot is represented below for the third component and the ER status. As suggested by the heatmap, the distribution of the samples on this component is strongly associated with their ER status, the latter coming up at the positive end of the component.      
+An example of  boxplot is represented below for the second component and the ER status. As suggested by the heatmap, the distribution of the samples on this component is strongly associated with their ER status, the latter coming up at the positive end of the component.      
 %As in \ref{fig:exhisto} we can see that the muscle-invasive tumors (T2+) seem to over-express the contributing genes of this component.
 \begin{figure}[htbp]
   \centering 
-\includegraphics[width=0.8\linewidth]{mainz/qualVarAnalysis/plots/3_er.png}
+\includegraphics[width=0.8\linewidth]{mainz/qualVarAnalysis/plots/2_er.png}
   \caption[Example of boxplot representing the distribution of breast tumors on the second component according to their ER status.]{ 
 Example of boxplot representing the distribution of ER status on the third component.
 The Wilcoxon test $p$-value is available in the title of the plot. 
-The legend indicates that the ER- tumors are represented in beige while ER+ are represented in light pink. The number of tumors in each group is given between brackets. 
-The gene witness is \textit{KRT16}. Each tumor sample is represented as a square point in the vertical line at the left end of the boxplots whose color denotes its  amount of expression of the \textit{KRT16} gene. The scale of these colors is denoted by a legend at the upper right of the graph.}
+The legend indicates that the ER+ tumors are represented in beige while ER- are represented in light pink. The number of tumors in each group is given between brackets. 
+The witness gene is \textit{KRT16}. Each tumor sample is represented as a square point in the vertical line at the left end of the boxplots whose color denotes its  amount of expression of the \textit{KRT16} gene. The scale of these colors is denoted by a legend at the upper right of the graph.}
   \label{fig:exdens}
 \end{figure}
 
@@ -710,7 +712,7 @@ The function creates a HTML file "quantVar.htm" containing correlations values, 
 \begin{figure}[htbp]
   \centering 
 \includegraphics[width=0.8\linewidth]{mainz/quantVarAnalysis/plots/2_age.png}
-  \caption[Scatter plot of age vs sample contributions.]{Scatter plot of AGE vs sample contributions. The gene witness is \textit{KRT16}. At the bottom of the plot, each sample is represented by a square point whose colour denotes the expression value of the \textit{KRT16} gene. The scale of these colors is denoted by a legend at the upper right of the graph. Note that the gene expression profiles were centered to have mean zero. }
+  \caption[Scatter plot of age vs sample contributions.]{Scatter plot of AGE vs sample contributions. The witness gene is \textit{KRT16}. At the bottom of the plot, each sample is represented by a square point whose colour denotes the expression value of the \textit{KRT16} gene. The scale of these colors is denoted by a legend at the upper right of the graph. Note that the gene expression profiles were centered to have mean zero. }
   \label{fig:exscatter}
 \end{figure}
 
@@ -752,7 +754,7 @@ Here is the example of the distribution of the tumors according to their ER stat
 <<stageOnHist, echo=TRUE, results=hide, print=FALSE, eval=FALSE>>=
 ## plot the positions of the samples on the second component according to their ER status
 ## (in a file "er.pdf") 
-plotPosAnnotInComp(icaSet=icaSetMainz, keepVar=c("er"), keepComp=2,  
+plotPosAnnotInComp(icaSet=icaSetMainz, params=params, keepVar=c("er"), keepComp=2,  
                    funClus="Mclust")
 @ 
 \begin{figure}[htbp]

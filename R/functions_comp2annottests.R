@@ -184,7 +184,7 @@ qualVarAnalysis <- function(params, icaSet, keepVar, keepComp=indComp(icaSet), k
             whichAnnotSign <- 1:nrow(resTests)
         
         
-        if (missing(colours) || length(colours)==0)
+        if (missing(colours) | length(colours)==0)
               colours <- annot2Color(annot)
 
         
