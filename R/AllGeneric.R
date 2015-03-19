@@ -45,9 +45,6 @@ setGeneric ( "chipManu<-" , function ( object, value ){ standardGeneric ( "chipM
 setGeneric ( "getTypeID" , function ( object ){ standardGeneric ( "getTypeID" )})
 setGeneric ( "typeID<-" , function ( object, value){ standardGeneric ( "typeID<-" )})
 setGeneric ( "typeID" , function ( object ){ standardGeneric ( "typeID" )})
-setGeneric ( "getOrganism" , function ( object ){ standardGeneric ( "getOrganism" )})
-setGeneric ( "organism<-" , function ( object, value){ standardGeneric ( "organism<-" )})
-setGeneric ( "organism" , function ( object ){ standardGeneric ( "organism" )})
 setGeneric ( "getMart" , function ( object ){ standardGeneric ( "getMart" )})
 setGeneric ( "mart<-" , function ( object, value){ standardGeneric ( "mart<-" )})
 setGeneric ( "mart" , function ( object ){ standardGeneric ( "mart" )})
@@ -72,8 +69,6 @@ setGeneric ( "setPackage<-" , function ( object, value ){ standardGeneric ( "set
 setGeneric ( "package<-" , function ( object, value ){ standardGeneric ( "package<-" )})
 setGeneric ( "setTypeID<-" , function ( object, value ){ standardGeneric ( "setTypeID<-" )})
 setGeneric ( "typeID<-" , function ( object, value ){ standardGeneric ( "typeID<-" )})
-setGeneric ( "setOrganism<-" , function ( object, value ){ standardGeneric ( "setOrganism<-" )})
-setGeneric ( "organism<-" , function ( object, value ){ standardGeneric ( "organism<-" )})
 setGeneric ( "setMart<-" , function ( object, value ){ standardGeneric ( "setMart<-" )})
 setGeneric ( "mart<-" , function ( object, value ){ standardGeneric ( "mart<-" )})
                          

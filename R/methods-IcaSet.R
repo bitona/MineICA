@@ -553,12 +553,6 @@ setMethod( "organism" ,"IcaSet" ,
       }
 )
 
-setMethod( "getOrganism" ,"IcaSet" ,
-       function (object){
-           return (object@organism)
-      }
-)
-
 setMethod( "mart" ,"IcaSet" ,
        function (object){
            return (object@mart)
@@ -872,17 +866,6 @@ setReplaceMethod( f="mart",
            return (object)
       }
 )
-
-setReplaceMethod( f="setOrganism",
-      signature = "IcaSet" ,
-       definition = function (object, value){
-           object@organism <- value
-           validObject (object)
-           return (object)
-      }
-)
-
-
 
 setReplaceMethod(
       f = "package" ,

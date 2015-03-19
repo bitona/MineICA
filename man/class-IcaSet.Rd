@@ -23,10 +23,6 @@
 \alias{organism<-}
 \alias{organism,IcaSet-method}
 \alias{organism<-,IcaSet-method}
-\alias{organism<-,IcaSet,character-method}
-\alias{setOrganism,IcaSet-method}
-\alias{getOrganism,IcaSet-method}
-
 
 \alias{mart}
 \alias{mart<-}
