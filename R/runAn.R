@@ -105,27 +105,60 @@ clusterFastICARuns <- function(X, nbComp, nbIt=100, alg.type = c("deflation", "p
     ## compute Iq indices and extract centrotypes
     # Iq=avg(intra-cluster similarity) - avg(extra-cluster similarity)
     
-    Iq <- 
-        foreach(clus=unique(partition), .combine=c) %dopar% {
-            indC <- which(partition==clus)
-            if (length(indC)>1) {
-                if (funClus != "pam")
-                    centrotypes <- c(centrotypes,indC[which.max(apply(sim[indC,indC],1,sum))])
-                internalSim <- mean(sim[indC,indC])
-            }
-            else {
-                if (funClus != "pam")
-                    centrotypes <- c(centrotypes,indC)
-                internalSim <- sim[indC,indC]                                
-            }
-            externalSim <- mean(sim[indC,setdiff(1:ncol(sim),indC)])
-            iq <- internalSim-externalSim
+    getIqCentr <-  function(clus, partition, sim, funClus) {
+	      	indC <- which(partition==clus)
+            	if (length(indC)>1) {
+                   if (funClus != "pam")
+                      centrotypes <- indC[which.max(apply(sim[indC,indC],1,sum))]
+                   internalSim <- mean(sim[indC,indC])
+            	} else {
+                   if (funClus != "pam")
+                      centrotypes <- indC
+                      internalSim <- sim[indC,indC]                                
+            	}
+            	externalSim <- mean(sim[indC,setdiff(1:ncol(sim),indC)])
+            	iq <- internalSim-externalSim
 
-            return(iq)
-        }
+            	return(c(centrotype=centrotypes,iq=iq))
+    }
+		
+
+    if (requireNamespace("future", quietly = TRUE) & requireNamespace("future.apply", quietly = TRUE)) {
+       future::plan(future::multiprocess) ## => parallelize on your local computer
+       iqcentr <-
+       	  future.apply::future_lapply(unique(partition), getIqCentr, partition=partition, sim=sim, funClus=funClus)
+    } else {
+        iqcentr <-
+       	  lapply(unique(partition), getIqCentr, partition=partition, sim=sim, funClus=funClus)    
+    }
+    
+    iqcentr <- do.call(rbind, iqcentr)
+    Iq <- iqcentr[,"iq"]
+    if (funClus != "pam") centrotypes <- iqcentr[,"centrotype"]
+    
+	
+
+#    Iq <- 
+#        foreach(clus=unique(partition), .combine=c) %dopar% {
+#            indC <- which(partition==clus)
+#            if (length(indC)>1) {
+#                if (funClus != "pam")
+#                    centrotypes <- c(centrotypes,indC[which.max(apply(sim[indC,indC],1,sum))])
+#                internalSim <- mean(sim[indC,indC])
+#            }
+#            else {
+#                if (funClus != "pam")
+#                    centrotypes <- c(centrotypes,indC)
+#                internalSim <- sim[indC,indC]                                
+#            }
+#            externalSim <- mean(sim[indC,setdiff(1:ncol(sim),indC)])
+#            iq <- internalSim-externalSim
+#
+#            return(iq)
+#        }
 
     
-    ## extract W including the centrotypes of each cluster
+    ## Extract W including the centrotypes of each cluster
     W <- whit %*% allW[,centrotypes]
     A <- solve(t(W)%*%W) %*% t(W)
     S <- X%*%W
