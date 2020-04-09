@@ -22,7 +22,7 @@ Depends: R (>= 2.10), methods, BiocGenerics (>= 0.13.8), Biobase, plyr,
 Imports: AnnotationDbi, lumi, fpc, lumiHumanAll.db
 Suggests: biomaRt, GOstats, cluster, hgu133a.db, mclust, igraph,
         breastCancerMAINZ, breastCancerTRANSBIG, breastCancerUPP,
-        breastCancerVDX
+        breastCancerVDX, future, future.apply
 Enhances: doMC
 Collate: 'AllClasses.R' 'AllGeneric.R' 'methods-IcaSet.R'
         'methods-MineICAParams.R' 'compareAnalysis.R'
