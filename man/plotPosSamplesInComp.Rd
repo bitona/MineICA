@@ -19,7 +19,7 @@
   \code{names(samplesByGroup)} is NULL.}
 
   \item{icaSet}{An object of class
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}}
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}}
 
   \item{keepComp}{A subset of components available in
   \code{indComp(icaSet)}, if NULL (default) all components
@@ -57,7 +57,7 @@
 \description{
   This function plots the positions of several groups of
   samples across all the components of an
-  \code{\link[MineICA:IcaSet-class]{icaSet}} object.
+  \code{\link[MineICA:class-IcaSet]{icaSet}} object.
 }
 \details{
   For each subgroup of samples this function plots their
@@ -98,7 +98,7 @@ dev.off()
 }
 \seealso{
   \code{\link{hist}},
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}
 }
 \keyword{internal}
 

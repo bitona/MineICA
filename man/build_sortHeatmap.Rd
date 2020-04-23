@@ -42,7 +42,7 @@
   This function returns the matrices that will be used to
   plot the heatmaps of each component. It restricts the
   data matrix of the
-  \code{\link[MineICA:IcaSet-class]{icaSet}} object to the
+  \code{\link[MineICA:class-IcaSet]{icaSet}} object to the
   contributing genes/features, and order the features/genes
   and samples.
 }

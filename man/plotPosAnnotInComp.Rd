@@ -77,7 +77,7 @@
   This function plots the positions of groups of samples
   formed by the variables (i.e the sample annotations)
   across all the components of an object of class
-  \code{\link[MineICA:IcaSet-class]{icaSet}}. For each
+  \code{\link[MineICA:class-IcaSet]{icaSet}}. For each
   variable level (e.g for each tumor stage) this function
   plots the positions of the corresponding samples (e.g the
   subset of samples having this tumor stage) within the

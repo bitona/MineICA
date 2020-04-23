@@ -23,4 +23,4 @@ Alist(object)
 }
 \author{Anne Biton}
 
-\seealso{\code{\link{IcaSet-class}}}
+\seealso{\code{\link{class-IcaSet}}}

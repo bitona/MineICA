@@ -11,7 +11,7 @@
   \item{icaSet}{An object of class \code{IcaSet}}
 
   \item{params}{An object of class
-  \code{\link[MineICA:MineICAParams-class]{MineICAParams}}
+  \code{\link[MineICA:class-MineICAParams]{MineICAParams}}
   containing the parameters of the analysis}
 
   \item{path}{The path where results will be saved}
@@ -50,7 +50,7 @@
   Runs an enrichment analysis of the contributing genes
   associated with each component, using the function
   \code{hyperGTest} of package
-  \code{\link[GOstats]{GOstats}}. The easiest way to run
+  \code{\link{GOstats}}. The easiest way to run
   enrichment analysis is to use function
   \code{\link{runEnrich}}.
 }

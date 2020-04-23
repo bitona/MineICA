@@ -11,11 +11,11 @@
 }
 \arguments{
   \item{params}{An object of class
-  \code{\link[MineICA:MineICAParams-class]{MineICAParams}}
+  \code{\link[MineICA:class-MineICAParams]{MineICAParams}}
   containing the parameters of the analysis}
 
   \item{icaSet}{An object of class
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}}
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}}
 
   \item{res}{A matrix or data.frame of dimension
   'components x variables' containing numeric values that

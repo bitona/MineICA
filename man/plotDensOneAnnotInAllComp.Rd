@@ -9,7 +9,7 @@
 }
 \arguments{
   \item{icaSet}{an object of class
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}}
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}}
 
   \item{keepVar}{a variable label, i.e the label of a
   column of the pheno data of icaSet available in

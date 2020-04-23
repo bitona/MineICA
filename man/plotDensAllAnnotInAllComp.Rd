@@ -11,10 +11,10 @@
 }
 \arguments{
   \item{icaSet}{an object of class
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}}
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}}
 
   \item{params}{An object of the class
-  \code{\link[MineICA:MineICAParams-class]{MineICAParams}}
+  \code{\link[MineICA:class-MineICAParams]{MineICAParams}}
   containing the parameters of the analysis}
 
   \item{path}{the directory where the plots will be

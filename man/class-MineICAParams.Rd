@@ -2,7 +2,7 @@
 \docType{class}
 \alias{class:MineICAParams}
 \alias{MineICAParams}
-\alias{MineICAParams-class}
+\alias{class-MineICAParams}
 \alias{Sfile}
 \alias{getSfile}
 \alias{setSfile}
@@ -139,7 +139,7 @@
 \author{Anne Biton}
 
 \seealso{
-  \code{\link{MineICAParams-class}}, \code{\link{runAn}}.
+  \code{\link{class-MineICAParams}}, \code{\link{runAn}}.
 }
 
 \examples{

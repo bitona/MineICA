@@ -8,10 +8,10 @@
 }
 \arguments{
   \item{icaSet}{An object of class
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}}
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}}
 
   \item{params}{An object of class
-  \code{\link[MineICA:MineICAParams-class]{MineICAParams}}
+  \code{\link[MineICA:class-MineICAParams]{MineICAParams}}
   providing the parameters of the analysis}
 
   \item{dbs}{The database to use, default is

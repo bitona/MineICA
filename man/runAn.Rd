@@ -19,11 +19,11 @@
 }
 \arguments{
   \item{params}{An object of class
-  \code{\link[MineICA:MineICAParams-class]{MineICAParams}}
+  \code{\link[MineICA:class-MineICAParams]{MineICAParams}}
   containing the parameters of the analysis.}
 
   \item{icaSet}{An object of class
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}.}
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}.}
 
   \item{keepVar}{The variable labels to be considered, i.e
   a subset of the annotation variables available in
@@ -68,12 +68,12 @@
 
   \item{ontoGOstats}{A string specifying the GO ontology to
   use. Must be one of 'BP', 'CC', or 'MF', see
-  \code{\link[Category:GOHyperGParams-class]{GOHyperGParams}}.
+  \code{\link[Category:class-GOHyperGParams]{GOHyperGParams}}.
   Only used when argument \code{dbGOstats} is 'GO'.}
 
   \item{condGOstats}{A logical indicating whether the
   calculation should conditioned on the GO structure, see
-  \code{\link[Category:GOHyperGParams-class]{GOHyperGParams}}.}
+  \code{\link[Category:class-GOHyperGParams]{GOHyperGParams}}.}
 
   \item{cutoffGOstats}{The p-value threshold used for
   selecting enriched gene sets, default is

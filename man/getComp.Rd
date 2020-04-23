@@ -30,4 +30,4 @@ getComp(object, level, ind)
 }
 \author{Anne Biton}
 
-\seealso{\code{\link{IcaSet-class}}}
+\seealso{\code{\link{class-IcaSet}}}

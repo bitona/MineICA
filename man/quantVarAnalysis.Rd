@@ -14,11 +14,11 @@
 }
 \arguments{
   \item{params}{An object of class
-  \code{\link[MineICA:MineICAParams-class]{MineICAParams}}
+  \code{\link[MineICA:class-MineICAParams]{MineICAParams}}
   providing the parameters of the analysis.}
 
   \item{icaSet}{An object of class
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}.}
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}.}
 
   \item{keepVar}{The variable labels to be considered, must
   be a subset of \code{varLabels(icaSet)}.}

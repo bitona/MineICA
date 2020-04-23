@@ -318,7 +318,7 @@
 
 \seealso{
   \code{\link{eSet-class}}, \code{\link{buildIcaSet}},
-  \code{\link{IcaSet-class}}, \code{\link{MineICAParams-class}}.
+  \code{\link{class-IcaSet}}, \code{\link{class-MineICAParams}}.
 }
 
 \examples{

@@ -47,11 +47,11 @@
 }
 \description{
   This function builds an object of class
-  \code{\link[MineICA:MineICAParams-class]{MineICAParams}}.
+  \code{\link[MineICA:class-MineICAParams]{MineICAParams}}.
   It contains the parameters that will be used by function
   \code{\link{runAn}} to analyze the ICA decomposition
   contained in an object of class
-  \code{\link[MineICA:IcaSet-class]{IcaSet}}.
+  \code{\link[MineICA:class-IcaSet]{IcaSet}}.
 }
 \examples{
 ## define default parameters and fill resPath
@@ -64,7 +64,7 @@ params <- buildMineICAParams(resPath="resMineICACarbayo/", selCutoff=4)
   Anne Biton
 }
 \seealso{
-  \code{\link[MineICA:MineICAParams-class]{MineICAParams}},
+  \code{\link[MineICA:class-MineICAParams]{MineICAParams}},
   \code{\link[MineICA]{runAn}}
 }
 
