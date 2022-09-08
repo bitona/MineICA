@@ -1024,7 +1024,7 @@ plotCorGraph <- function(
     indLowCor <- which(abs(E(ig)$weight)<=0.4)
     E(ig)$weight <- 1/abs(log2(abs(E(ig)$weight)))
     E(ig)$weight[indHighCor] <- E(ig)$weight[indHighCor]+6
-    E(ig)$weight[indLowCor] <- E(ig)$weight[indLowCor]-0.25
+    #E(ig)$weight[indLowCor] <- E(ig)$weight[indLowCor]-0.25
 
    if (!missing(reciproCol)) {
        if (reciproCol %in% colnames(dataGraph)) {
