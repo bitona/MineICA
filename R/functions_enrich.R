@@ -267,13 +267,12 @@ hypergeoAn <- function ( icaSet,
 `addGenesToGoReport` <-
 function(hgOver, universe, db = c("GO","KEGG"), onto = c("CC", "MF", "BP"), annotation = NULL, entrez2symbol = NULL) {
 
-  require(GOstats)
 
   db <- match.arg(tolower(db), choices = c("go","kegg"))
   onto <- match.arg(toupper(onto), choices = c("CC", "MF", "BP"))
 
-  a <- geneIdsByCategory(hgOver)
-  b <- geneIdUniverse(hgOver, cond=conditional(hgOver))
+  a <- GOstats::geneIdsByCategory(hgOver)
+  b <- GOstats::geneIdUniverse(hgOver, cond=conditional(hgOver))
 
   a <- a[sigCategories(hgOver)]
   b <- b[sigCategories(hgOver)]
