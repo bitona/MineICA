@@ -124,7 +124,7 @@ clusterFastICARuns <- function(X, nbComp, nbIt=100, alg.type = c("deflation", "p
 		
 
     if (requireNamespace("future", quietly = TRUE) & requireNamespace("future.apply", quietly = TRUE)) {
-       future::plan(future::multiprocess) ## => parallelize on your local computer
+       future::plan(future::multisession) ## => parallelize on your local computer
        iqcentr <-
        	  future.apply::future_lapply(unique(partition), getIqCentr, partition=partition, sim=sim, funClus=funClus)
     } else {
